@@ -1,0 +1,7 @@
+{
+	"name": "portfolio-server",
+	"adapter": "postgres",
+	"host": "localhost",
+	"user": "Kathy",
+	"database": "Portfolio"
+}
