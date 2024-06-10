@@ -1,147 +1,68 @@
-use anyhow::Ok;
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
-    Argon2,
-};
+pub mod database;
+pub mod util;
+
 use axum::{
     debug_handler,
     extract::State,
-    http::{HeaderMap, StatusCode},
+    http::StatusCode,
     routing::{get, post},
     Json, Router,
 };
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
-use serde::{Deserialize, Serialize};
+use database::schema::{LoginData, UserData};
+use jsonwebtoken::{encode, Header};
+use serde::Serialize;
 use sqlx::PgPool;
-use tower_http::trace::{self, TraceLayer};
-use tracing::Level;
-use tracing_subscriber::util::SubscriberInitExt;
-use zeroize::Zeroize;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use util::{
+    jwt::{Claims, KEYS},
+    password::{hash_pwd, verify_pwd},
+};
 
 #[derive(Clone)]
 struct AppState {
     pool: PgPool,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct User {
-    pub username: String,
-    pub display_name: String,
-    pub email: String,
-    pub password: String,
-}
+#[debug_handler]
+async fn register(
+    State(state): State<AppState>,
+    Json(mut user): Json<UserData>,
+) -> Result<(), StatusCode> {
+    hash_pwd(&mut user)?;
+    user.insert(&state.pool).await?;
 
-#[derive(Serialize, sqlx::FromRow, Deserialize)]
-pub struct Login {
-    pub username: String,
-    pub password: String,
+    Ok(())
 }
 
 #[derive(Serialize)]
-pub struct LoginResponse {
-    pub token: String,
+pub struct Jwt {
+    token: String,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Claims {
-    pub sub: String,
-    pub exp: usize,
-}
-
-async fn register(State(state): State<AppState>, Json(mut user): Json<User>) {
-    let argon2 = Argon2::default();
-    let salt = SaltString::generate(&mut OsRng);
-
-    let hashed = argon2
-        .hash_password(&user.password.as_bytes(), &salt)
-        .unwrap()
-        .to_string();
-    user.password.zeroize();
-
-    let query =
-        "INSERT INTO users (username, displayUsername, displayName, email, password, verified) VALUES ($1, $2, $3, $4, $5, $6)";
-    let _ = sqlx::query(query)
-        .bind(&user.username.to_lowercase())
-        .bind(&user.username)
-        .bind(&user.display_name)
-        .bind(&user.email.to_lowercase())
-        .bind(hashed)
-        .bind(false)
-        .execute(&state.pool)
-        .await;
-}
-
-#[debug_handler]
 async fn login(
     State(state): State<AppState>,
-    Json(user): Json<Login>,
-) -> Result<Json<LoginResponse>, StatusCode> {
-    let query = "SELECT username, password FROM users WHERE username=$1";
-    let data = sqlx::query_as::<_, Login>(query)
-        .bind(user.username)
-        .fetch_one(&state.pool)
-        .await;
+    Json(mut user): Json<LoginData>,
+) -> Result<Json<Jwt>, StatusCode> {
+    let data = user.select(&state.pool).await?;
 
-    match data {
-        Result::Ok(data) => {
-            let argon2 = Argon2::default();
-            let parsed_hash = PasswordHash::new(&data.password).unwrap();
-            let result = argon2.verify_password(&user.password.as_bytes(), &parsed_hash);
+    let _ = verify_pwd(&data.password, &mut user)?;
 
-            match result {
-                Result::Ok(_) => {
-                    let claims = Claims {
-                        sub: data.username.clone(),
-                        exp: (chrono::Utc::now() + chrono::Duration::weeks(12)).timestamp()
-                            as usize,
-                    };
+    let claims = Claims {
+        username: data.username.clone(),
+        iat: chrono::Utc::now().timestamp() as usize,
+        exp: (chrono::Utc::now() + chrono::Duration::weeks(12)).timestamp() as usize,
+    };
 
-                    let token = match encode(
-                        &Header::default(),
-                        &claims,
-                        &EncodingKey::from_secret("secret".as_ref()),
-                    ) {
-                        Result::Ok(tok) => tok,
-                        Err(e) => {
-                            eprintln!("Error generating token {}", e);
-                            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-                        }
-                    };
+    let token = encode(&Header::default(), &claims, &KEYS.encoding)
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-                    Result::Ok(Json(LoginResponse { token }))
-                }
-                Err(_) => Err(StatusCode::UNAUTHORIZED),
-            }
-        }
-        Err(_) => Err(StatusCode::NOT_FOUND),
-    }
+    Ok(Json(Jwt { token }))
 }
 
-async fn info_handler(header_map: HeaderMap) -> Result<Json<String>, StatusCode> {
-    if let Some(auth_header) = header_map.get("Authorization") {
-        if let Result::Ok(auth_header_str) = auth_header.to_str() {
-            if auth_header_str.starts_with("Bearer ") {
-                let token = auth_header_str.trim_start_matches("Bearer ").to_string();
-
-                return match decode::<Claims>(
-                    &token,
-                    &DecodingKey::from_secret("secret".as_ref()),
-                    &Validation::default(),
-                ) {
-                    Result::Ok(_) => {
-                        let info = "You are valid here is info".to_string();
-                        Result::Ok(Json(info))
-                    }
-                    Err(e) => {
-                        eprintln!("Error Generating Token {}", e);
-                        Err(StatusCode::UNAUTHORIZED)
-                    }
-                };
-            }
-        }
-    }
-
-    Err(StatusCode::UNAUTHORIZED)
+async fn info_handler(claims: Claims) -> Result<String, StatusCode> {
+    Ok(format!(
+        "Welcome to the protected area :D\nYour data:\n{claims}",
+    ))
 }
 
 #[tokio::main]
@@ -153,23 +74,22 @@ async fn main() -> anyhow::Result<()> {
 
     let state = AppState { pool };
 
-    tracing_subscriber::fmt()
-        .with_target(false)
-        .compact()
-        .init();
+    let _ = tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| "server=debug".into()),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .try_init();
 
     let router = Router::new()
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(trace::DefaultMakeSpan::new().level(Level::INFO))
-                .on_response(trace::DefaultOnResponse::new().level(Level::INFO)),
-        )
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/info", get(info_handler))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, router.into_make_service())
         .await
         .unwrap();
