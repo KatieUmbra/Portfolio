@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool};
+use sqlx::PgPool;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserData {

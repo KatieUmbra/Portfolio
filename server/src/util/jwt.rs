@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use axum::{
     async_trait,
-    extract::FromRequestParts,
+    extract::{FromRef, FromRequestParts},
     http::{request::Parts, StatusCode},
     RequestPartsExt,
 };
@@ -10,9 +10,10 @@ use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     TypedHeader,
 };
-use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Validation};
-use once_cell::sync::Lazy;
+use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
+
+use crate::{database::schema::LoginData, AppState};
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
@@ -21,45 +22,43 @@ pub struct Claims {
     pub exp: usize,
 }
 
-pub struct Keys {
-    pub encoding: EncodingKey,
-    pub decoding: DecodingKey,
-}
-
-impl Keys {
-    fn new(secret: &[u8]) -> Self {
-        Self {
-            encoding: EncodingKey::from_secret(secret),
-            decoding: DecodingKey::from_secret(secret),
-        }
-    }
-}
-
-pub static KEYS: Lazy<Keys> = Lazy::new(|| {
-    let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
-    Keys::new(secret.as_bytes())
-});
-
 impl Display for Claims {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Username: {}", self.username)
     }
 }
 
+impl Claims {
+    pub fn new(user: &LoginData) -> Claims {
+        Claims {
+            username: user.username.clone(),
+            iat: chrono::Utc::now().timestamp() as usize,
+            exp: (chrono::Utc::now() + chrono::Duration::hours(24)).timestamp() as usize,
+        }
+    }
+}
+
 #[async_trait]
 impl<S> FromRequestParts<S> for Claims
 where
-    S: Send + Sync,
+    AppState: FromRef<S>,
+    S: Send + Sync + std::fmt::Debug,
 {
     type Rejection = StatusCode;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, StatusCode> {
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let state = parts
+            .extract_with_state::<AppState, _>(state)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
         let TypedHeader(Authorization(bearer)) = parts
             .extract::<TypedHeader<Authorization<Bearer>>>()
             .await
             .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
-        let token_data = decode::<Claims>(bearer.token(), &KEYS.decoding, &Validation::default())
+        let decoding_key = DecodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
+
+        let token_data = decode::<Claims>(bearer.token(), &decoding_key, &Validation::default())
             .map_err(|_| StatusCode::UNAUTHORIZED)?;
 
         Ok(token_data.claims)

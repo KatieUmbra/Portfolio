@@ -1,78 +1,43 @@
 pub mod database;
+pub mod routing;
 pub mod util;
 
+use crate::util::setup::AppSettings;
 use axum::{
-    debug_handler,
-    extract::State,
-    http::StatusCode,
-    routing::{get, post},
-    Json, Router,
+    async_trait,
+    extract::{FromRef, FromRequestParts},
+    http::{request::Parts, StatusCode},
 };
 use database::schema::{LoginData, UserData};
-use jsonwebtoken::{encode, Header};
-use serde::Serialize;
+use dotenv::dotenv;
+use routing::router::create_router;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use util::{
-    jwt::{Claims, KEYS},
-    password::{hash_pwd, verify_pwd},
-};
 
-#[derive(Clone)]
-struct AppState {
-    pool: PgPool,
+#[derive(Clone, Debug)]
+pub struct AppState {
+    pub pool: PgPool,
+    pub settings: AppSettings,
 }
 
-#[debug_handler]
-async fn register(
-    State(state): State<AppState>,
-    Json(mut user): Json<UserData>,
-) -> Result<(), StatusCode> {
-    hash_pwd(&mut user)?;
-    user.insert(&state.pool).await?;
+#[async_trait]
+impl<S> FromRequestParts<S> for AppState
+where
+    Self: FromRef<S>,
+    S: Send + Sync + core::fmt::Debug,
+{
+    type Rejection = StatusCode;
 
-    Ok(())
-}
-
-#[derive(Serialize)]
-pub struct Jwt {
-    token: String,
-}
-
-async fn login(
-    State(state): State<AppState>,
-    Json(mut user): Json<LoginData>,
-) -> Result<Json<Jwt>, StatusCode> {
-    let data = user.select(&state.pool).await?;
-
-    let _ = verify_pwd(&data.password, &mut user)?;
-
-    let claims = Claims {
-        username: data.username.clone(),
-        iat: chrono::Utc::now().timestamp() as usize,
-        exp: (chrono::Utc::now() + chrono::Duration::weeks(12)).timestamp() as usize,
-    };
-
-    let token = encode(&Header::default(), &claims, &KEYS.encoding)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-    Ok(Json(Jwt { token }))
-}
-
-async fn info_handler(claims: Claims) -> Result<String, StatusCode> {
-    Ok(format!(
-        "Welcome to the protected area :D\nYour data:\n{claims}",
-    ))
+    async fn from_request_parts(_parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        Ok(Self::from_ref(state))
+    }
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let db_url = "postgres://Kathy@localhost/Portfolio";
-    let pool = sqlx::postgres::PgPool::connect(db_url).await?;
+    dotenv().ok();
 
-    sqlx::migrate!("./migrations").run(&pool).await?;
-
-    let state = AppState { pool };
+    let settings = AppSettings::new()?;
 
     let _ = tracing_subscriber::registry()
         .with(
@@ -82,17 +47,18 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .try_init();
 
-    let router = Router::new()
-        .route("/register", post(register))
-        .route("/login", post(login))
-        .route("/info", get(info_handler))
-        .with_state(state);
+    let pool = sqlx::postgres::PgPool::connect(&settings.db_url).await?;
+    sqlx::migrate!("./migrations").run(&pool).await?;
+    let state = AppState {
+        pool,
+        settings: settings.clone(),
+    };
+    let router = create_router().with_state(state);
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    let bind_address = settings.host + ":" + &settings.port;
+    let listener = tokio::net::TcpListener::bind(bind_address).await?;
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, router.into_make_service())
-        .await
-        .unwrap();
+    axum::serve(listener, router.into_make_service()).await?;
 
     Ok(())
 }
