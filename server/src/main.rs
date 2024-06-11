@@ -2,15 +2,17 @@ pub mod database;
 pub mod routing;
 pub mod util;
 
+use crate::routing::routes::{info, login, register};
 use crate::util::setup::AppSettings;
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
     http::{request::Parts, StatusCode},
+    routing::{get, post},
+    Router,
 };
 use database::schema::{LoginData, UserData};
 use dotenv::dotenv;
-use routing::router::create_router;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -53,7 +55,11 @@ async fn main() -> anyhow::Result<()> {
         pool,
         settings: settings.clone(),
     };
-    let router = create_router().with_state(state);
+    let router = Router::new()
+        .route("/login", post(login))
+        .route("/register", post(register))
+        .route("/info", get(info))
+        .with_state(state);
 
     let bind_address = settings.host + ":" + &settings.port;
     let listener = tokio::net::TcpListener::bind(bind_address).await?;
