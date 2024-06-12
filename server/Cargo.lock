@@ -1593,7 +1593,6 @@ dependencies = [
  "chrono",
  "dotenv",
  "jsonwebtoken",
- "once_cell",
  "password-hash",
  "serde",
  "serde_json",

@@ -6,7 +6,9 @@ use argon2::{
 use axum::http::StatusCode;
 use zeroize::Zeroize;
 
-pub fn hash_pwd(user: &mut UserData) -> Result<(), StatusCode> {
+use super::error::ApiError;
+
+pub fn hash_pwd(user: &mut UserData) -> Result<(), ApiError> {
     let argon2 = Argon2::default();
     let salt = SaltString::generate(&mut OsRng);
 
@@ -18,16 +20,28 @@ pub fn hash_pwd(user: &mut UserData) -> Result<(), StatusCode> {
         user.password = pwd.to_string();
         Ok(())
     } else {
-        Err(StatusCode::INTERNAL_SERVER_ERROR)
+        Err(ApiError {
+            message: "Something went wrong, try again later".into(),
+            error_code: None,
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        })
     }
 }
 
-pub fn verify_pwd(hashed: &String, user: &mut LoginData) -> Result<(), StatusCode> {
+pub fn verify_pwd(hashed: &String, user: &mut LoginData) -> Result<(), ApiError> {
     let argon2 = Argon2::default();
-    let parsed_hash = PasswordHash::new(&hashed).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    let result = argon2
+    let parsed_hash = PasswordHash::new(&hashed).map_err(|_| ApiError {
+        message: "An internal error has occurred, please contact support".into(),
+        error_code: None,
+        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+    })?;
+    let _ = argon2
         .verify_password(&user.password.as_bytes(), &parsed_hash)
-        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        .map_err(|_| ApiError {
+            message: "The provided password is not correct".into(),
+            error_code: None,
+            status_code: StatusCode::UNAUTHORIZED,
+        })?;
     user.password.zeroize();
-    Ok(result)
+    Ok(())
 }
