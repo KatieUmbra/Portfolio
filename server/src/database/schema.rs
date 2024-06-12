@@ -4,7 +4,7 @@ use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-use crate::util::error::ApiError;
+use crate::util::error::{ApiError, ApiErrorCode};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct UserData {
@@ -23,29 +23,33 @@ pub struct LoginData {
 pub fn user_db_map_error(error: sqlx::Error) -> ApiError {
     let err1 = ApiError {
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        error_code: None,
+        error_code: ApiErrorCode::InternalError,
         message: "Something went wrong, try again later".to_string(),
     };
 
-    let db_constraint_error_map: HashMap<&str, String> = HashMap::from([
-        ("users_pkey", "This username already exists!".to_string()),
+    let db_constraint_error_map: HashMap<&str, ApiError> = HashMap::from([
+        (
+            "users_pkey",
+            ApiError {
+                message: "This username already exists!".to_string(),
+                error_code: ApiErrorCode::RegisterUsernameExists,
+                status_code: StatusCode::CONFLICT,
+            },
+        ),
         (
             "users_email_key",
-            "This email is already in use!".to_string(),
+            ApiError {
+                message: "This email is already in use!".to_string(),
+                error_code: ApiErrorCode::RegisterEmailExists,
+                status_code: StatusCode::CONFLICT,
+            },
         ),
     ]);
 
     let error = error.into_database_error();
     if let Some(res) = error {
         if let Some(constraint) = res.constraint() {
-            ApiError {
-                status_code: StatusCode::CONFLICT,
-                error_code: None,
-                message: db_constraint_error_map
-                    .get(&constraint)
-                    .unwrap()
-                    .to_string(),
-            }
+            db_constraint_error_map.get(constraint).unwrap().clone()
         } else {
             err1
         }
@@ -84,7 +88,7 @@ impl LoginData {
                 message: "This account does not exist, please register a new account to proceed"
                     .into(),
                 status_code: StatusCode::NOT_FOUND,
-                error_code: None,
+                error_code: ApiErrorCode::LoginUsernameNotFound,
             })?;
 
         Ok(data)

@@ -1,7 +1,7 @@
 use crate::{
     database::schema::{LoginData, UserData},
     util::{
-        error::ApiError,
+        error::{ApiError, ApiErrorCode},
         jwt::Claims,
         password::{hash_pwd, verify_pwd},
     },
@@ -38,7 +38,7 @@ pub async fn login(
     let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
         message: "An internal error has occurred, please contact support".into(),
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        error_code: None,
+        error_code: ApiErrorCode::InternalErrorContactSupport,
     })?;
 
     Ok(axum::Json(Token { token }))

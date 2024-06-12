@@ -6,7 +6,7 @@ use argon2::{
 use axum::http::StatusCode;
 use zeroize::Zeroize;
 
-use super::error::ApiError;
+use super::error::{ApiError, ApiErrorCode};
 
 pub fn hash_pwd(user: &mut UserData) -> Result<(), ApiError> {
     let argon2 = Argon2::default();
@@ -22,7 +22,7 @@ pub fn hash_pwd(user: &mut UserData) -> Result<(), ApiError> {
     } else {
         Err(ApiError {
             message: "Something went wrong, try again later".into(),
-            error_code: None,
+            error_code: ApiErrorCode::InternalError,
             status_code: StatusCode::INTERNAL_SERVER_ERROR,
         })
     }
@@ -32,14 +32,14 @@ pub fn verify_pwd(hashed: &String, user: &mut LoginData) -> Result<(), ApiError>
     let argon2 = Argon2::default();
     let parsed_hash = PasswordHash::new(&hashed).map_err(|_| ApiError {
         message: "An internal error has occurred, please contact support".into(),
-        error_code: None,
+        error_code: ApiErrorCode::InternalErrorContactSupport,
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
     })?;
     let _ = argon2
         .verify_password(&user.password.as_bytes(), &parsed_hash)
         .map_err(|_| ApiError {
             message: "The provided password is not correct".into(),
-            error_code: None,
+            error_code: ApiErrorCode::LoginWrongPassword,
             status_code: StatusCode::UNAUTHORIZED,
         })?;
     user.password.zeroize();

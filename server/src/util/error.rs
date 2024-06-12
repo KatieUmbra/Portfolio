@@ -3,12 +3,26 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use serde::Serialize;
 use serde_json::json;
 
+#[derive(Serialize, Clone)]
+pub enum ApiErrorCode {
+    None = 0,
+    RegisterEmailExists = 1,
+    RegisterUsernameExists = 2,
+    LoginUsernameNotFound = 11,
+    LoginWrongPassword = 12,
+    InternalError = 21,
+    InternalErrorContactSupport = 22,
+    InternalUnspecifiedError = 23,
+}
+
+#[derive(Clone)]
 pub struct ApiError {
     pub message: String,
     pub status_code: StatusCode,
-    pub error_code: Option<u8>,
+    pub error_code: ApiErrorCode,
 }
 
 impl IntoResponse for ApiError {
@@ -20,7 +34,7 @@ impl IntoResponse for ApiError {
             [(header::CONTENT_TYPE, "application/json")],
             Json(json!({
                 "statusCode": self.status_code.as_u16(),
-                "errorCode": self.error_code,
+                "errorCode": self.error_code as u8,
                 "message": self.message
             })),
         )
@@ -33,7 +47,7 @@ impl From<StatusCode> for ApiError {
         ApiError {
             message: "Unspecified Api Error".to_string(),
             status_code: code,
-            error_code: None,
+            error_code: ApiErrorCode::InternalUnspecifiedError,
         }
     }
 }

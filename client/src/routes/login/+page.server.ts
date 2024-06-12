@@ -1,10 +1,15 @@
+import { fail } from "@sveltejs/kit";
+
 export const actions = {
     default: async ({ cookies, request }) => {
+
         const data = await request.formData();
+
         const formData = {
                 "username": data.get("username"),
                 "password": data.get("password")
         };
+
         const req = await fetch("http://localhost:8080/login", {
             method: "POST",
             mode: "cors",
@@ -13,7 +18,14 @@ export const actions = {
             },
             body: JSON.stringify(formData)
         }); 
-        const jwt = await req.text();
-        cookies.set("token", jwt, {path:"/", maxAge: 86400});
+
+        let json = await req.json();
+        if (!req.ok) {
+            return fail(req.status, {...json, failure: true });
+        }
+        const jwt = await json;
+
+        cookies.set("token", jwt.token, {path:"/", maxAge: 86400});
+        return { failure: false };
     },
 }
