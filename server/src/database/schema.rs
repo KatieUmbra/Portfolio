@@ -101,6 +101,10 @@ impl EmailRequest {
 
         Ok(())
     }
+
+    pub async fn select(&self, pool: &PgPool) -> Result<(), ApiError> {
+        todo!();
+    }
 }
 
 impl LoginData {

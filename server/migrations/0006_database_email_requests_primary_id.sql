@@ -1,0 +1,2 @@
+ALTER TABLE email_requests
+    ADD COLUMN id SERIAL PRIMARY KEY;
