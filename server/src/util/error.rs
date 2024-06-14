@@ -16,6 +16,7 @@ pub enum ApiErrorCode {
     InternalError = 21,
     InternalErrorContactSupport = 22,
     InternalUnspecifiedError = 23,
+    UtilMismatchString = 31,
 }
 
 #[derive(Clone)]

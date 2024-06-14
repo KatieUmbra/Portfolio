@@ -2,7 +2,7 @@ pub mod database;
 pub mod routing;
 pub mod util;
 
-use crate::routing::routes::{info, login, register};
+use crate::routing::routes::user::{info, login, register};
 use crate::util::setup::AppSettings;
 use axum::{
     async_trait,
@@ -13,6 +13,7 @@ use axum::{
 };
 use database::schema::{LoginData, UserData};
 use dotenv::dotenv;
+use routing::routes::user::req_email_verify;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -59,6 +60,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/login", post(login))
         .route("/register", post(register))
         .route("/info", get(info))
+        .route("/reqEmailVerify", post(req_email_verify))
         .with_state(state);
 
     let bind_address = settings.host + ":" + &settings.port;

@@ -20,6 +20,14 @@ pub struct LoginData {
     pub password: String,
 }
 
+#[derive(Serialize, sqlx::FromRow, Deserialize, Clone)]
+pub struct EmailRequest {
+    pub username: String,
+    pub secret: String,
+    pub operation: i32,
+    pub expiration: chrono::DateTime<chrono::Utc>,
+}
+
 pub fn user_db_map_error(error: sqlx::Error) -> ApiError {
     let err1 = ApiError {
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
@@ -48,7 +56,9 @@ pub fn user_db_map_error(error: sqlx::Error) -> ApiError {
 
     let error = error.into_database_error();
     if let Some(res) = error {
+        println!("{:?}", &res);
         if let Some(constraint) = res.constraint() {
+            println!("constraint: {:?}", res);
             db_constraint_error_map.get(constraint).unwrap().clone()
         } else {
             err1
@@ -68,7 +78,23 @@ impl UserData {
             .bind(&self.display_name)
             .bind(&self.email.to_lowercase())
             .bind(&self.password)
-            .bind(false)
+            .bind(2)
+            .execute(pool)
+            .await
+            .map_err(user_db_map_error)?;
+
+        Ok(())
+    }
+}
+
+impl EmailRequest {
+    pub async fn insert(&self, pool: &PgPool) -> Result<(), ApiError> {
+        let query = "INSERT INTO email_requests (username, secret, operation, expiration) VALUES ($1, $2, $3, $4);";
+        let _ = sqlx::query(query)
+            .bind(&self.username.to_lowercase())
+            .bind(&self.secret)
+            .bind(&self.operation)
+            .bind(&self.expiration)
             .execute(pool)
             .await
             .map_err(user_db_map_error)?;
