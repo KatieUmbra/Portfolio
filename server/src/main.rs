@@ -2,7 +2,7 @@ pub mod database;
 pub mod routing;
 pub mod util;
 
-use crate::routing::routes::user::{info, login, register};
+use crate::routing::routes::user::{info, login, register, req_email_verify};
 use crate::util::setup::AppSettings;
 use axum::{
     async_trait,
@@ -11,9 +11,8 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use database::schema::{LoginData, UserData};
+use database::schema::LoginData;
 use dotenv::dotenv;
-use routing::routes::user::req_email_verify;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

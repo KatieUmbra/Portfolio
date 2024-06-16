@@ -10,6 +10,8 @@ pub struct AppSettings {
     pub environment: String,
     pub db_url: String,
     pub jwt_secret: String,
+    pub smtp_username: String,
+    pub smtp_password: String,
 }
 
 impl AppSettings {
@@ -21,6 +23,8 @@ impl AppSettings {
             environment: env::var("APP_ENVIRONMENT")?.to_string(),
             db_url: env::var("DATABASE_URL")?.to_string(),
             jwt_secret: env::var("JWT_SECRET")?.to_string(),
+            smtp_username: env::var("SMTP_USERNAME")?.to_string(),
+            smtp_password: env::var("SMTP_PASSWORD")?.to_string(),
         })
     }
 }

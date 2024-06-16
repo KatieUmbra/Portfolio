@@ -1,4 +1,4 @@
-use crate::{LoginData, UserData};
+use crate::LoginData;
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
     Argon2, PasswordHash, PasswordVerifier,
