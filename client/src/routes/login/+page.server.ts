@@ -10,7 +10,7 @@ export const actions = {
                 "password": data.get("password")
         };
 
-        const req = await fetch("http://localhost:8080/login", {
+        const req = await fetch("http://localhost:8081/login", {
             method: "POST",
             mode: "cors",
             headers: {

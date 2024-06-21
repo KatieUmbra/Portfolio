@@ -10,13 +10,7 @@ use crate::{
 use ::chrono::Duration;
 use axum::{debug_handler, extract::State, http::StatusCode, Json};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use lettre::{
-    transport::smtp::{
-        authentication::Credentials,
-        client::{Tls, TlsParameters},
-    },
-    Message, SmtpTransport, Transport,
-};
+use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::Serialize;
 use sqlx::types::chrono;
@@ -77,18 +71,7 @@ pub async fn req_email_verify(
         .map(char::from)
         .collect::<String>();
 
-    let res = hash_str(&mut s)?;
-
-    let request = EmailRequest {
-        username: claims.username.clone(),
-        secret: res,
-        operation: 0,
-        expiration: chrono::Utc::now() + Duration::hours(24),
-    };
-
-    request.insert(&state.pool).await?;
-
-    let user = UserData::select(claims.username, &state.pool).await?;
+    let user = UserData::select(claims.username.clone(), &state.pool).await?;
 
     let creds = Credentials::new(
         state.settings.smtp_username.clone(),
@@ -99,17 +82,23 @@ pub async fn req_email_verify(
         .from("no-reply@kaytea.dev".parse().unwrap())
         .to(user.email.parse().unwrap())
         .subject("Verify your password!")
-        .body(String::from("Email :3"))
+        .body(format!(
+            "Verify your email address with the following link: http://192.168.1.20:5173/verify?token={}", &s
+        ))
         .unwrap();
 
-    let tls = TlsParameters::builder("kaytea.dev".to_owned())
-        .dangerous_accept_invalid_certs(true)
-        .build()
-        .unwrap();
+    let res = hash_str(&mut s)?;
+    let request = EmailRequest {
+        username: claims.username.clone(),
+        secret: res,
+        operation: 0,
+        expiration: chrono::Utc::now() + Duration::hours(24),
+    };
+    request.insert(&state.pool).await?;
 
-    let sender = SmtpTransport::relay("kaytea.dev")
+    let sender = SmtpTransport::relay("mail.smtp2go.com")
         .unwrap()
-        .tls(Tls::Required(tls))
+        .credentials(creds)
         .build();
 
     let _result = sender.send(&email).map_err(|e| {

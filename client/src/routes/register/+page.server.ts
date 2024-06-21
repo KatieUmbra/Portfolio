@@ -12,7 +12,7 @@ export const actions = {
             "password": data.get("password")
         };
 
-        const req = await fetch("http://localhost:8080/register", {
+        const req = await fetch("http://localhost:8081/register", {
             method: "POST",
             mode: "cors",
             headers: {
