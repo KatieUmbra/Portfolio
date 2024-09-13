@@ -1,5 +1,6 @@
 use crate::{
-    database::schema::{EmailRequest, LoginData, UserData},
+    database::schema::{email_request::EmailRequest, login_data::LoginData, user_data::UserData},
+    routing::routes::structs::EmailToken,
     util::{
         error::{ApiError, ApiErrorCode},
         jwt::Claims,
@@ -12,18 +13,9 @@ use axum::{debug_handler, extract::State, http::StatusCode, Json};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use lettre::{Message, Transport};
 use rand::{distributions::Alphanumeric, Rng};
-use serde::{Deserialize, Serialize};
 use sqlx::types::chrono;
 
-#[derive(Serialize)]
-pub struct Token {
-    token: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct EmailToken {
-    veri_token: String,
-}
+use super::structs::Token;
 
 #[debug_handler]
 pub async fn register(
@@ -72,7 +64,6 @@ pub async fn verify(
     State(state): State<AppState>,
     Json(token): Json<EmailToken>,
 ) -> Result<(), ApiError> {
-    tracing::debug!("Token: {:?}", &token.veri_token);
     let db_email_req_dummy = EmailRequest {
         username: claims.username.clone(),
         ..Default::default()
@@ -122,6 +113,7 @@ pub async fn req_email_verify(
         secret,
         operation: 0,
         expiration: chrono::Utc::now() + Duration::hours(24),
+        id: 0,
     };
     request.insert(&state.pool).await?;
 

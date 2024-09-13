@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+/// Portfolio application complete with blog and accounts
 pub mod database;
 pub mod routing;
 pub mod util;
@@ -12,7 +14,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use database::schema::LoginData;
+use database::schema::login_data::LoginData;
 use dotenv::dotenv;
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::SmtpTransport;
@@ -20,6 +22,7 @@ use routing::routes::user::verify;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+/// Contains the global state of the app, accesible by all routes.
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub pool: PgPool,

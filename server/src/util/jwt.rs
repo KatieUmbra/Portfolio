@@ -13,7 +13,7 @@ use axum_extra::{
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::{database::schema::LoginData, AppState};
+use crate::{database::schema::login_data::LoginData, AppState};
 
 #[derive(Serialize, Deserialize)]
 pub struct Claims {
