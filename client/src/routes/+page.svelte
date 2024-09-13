@@ -1,4 +1,4 @@
 <script lang="typescript">
 </script>
 
-<p class="text-lg m-10">Home Page</p>
+<p class="m-10 text-lg">Home Page</p>

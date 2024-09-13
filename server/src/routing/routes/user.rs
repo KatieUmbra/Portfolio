@@ -10,14 +10,19 @@ use crate::{
 use ::chrono::Duration;
 use axum::{debug_handler, extract::State, http::StatusCode, Json};
 use jsonwebtoken::{encode, EncodingKey, Header};
-use lettre::{transport::smtp::authentication::Credentials, Message, SmtpTransport, Transport};
+use lettre::{Message, Transport};
 use rand::{distributions::Alphanumeric, Rng};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::types::chrono;
 
 #[derive(Serialize)]
 pub struct Token {
     token: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct EmailToken {
+    veri_token: String,
 }
 
 #[debug_handler]
@@ -61,11 +66,41 @@ pub async fn info(claims: Claims) -> Result<String, ApiError> {
     ))
 }
 
+#[debug_handler]
+pub async fn verify(
+    claims: Claims,
+    State(state): State<AppState>,
+    Json(token): Json<EmailToken>,
+) -> Result<(), ApiError> {
+    tracing::debug!("Token: {:?}", &token.veri_token);
+    let db_email_req_dummy = EmailRequest {
+        username: claims.username.clone(),
+        ..Default::default()
+    };
+    let db_email_request = db_email_req_dummy.select(&state.pool).await?;
+
+    if token.veri_token != db_email_request.secret {
+        return Err(ApiError {
+            message: "The provided token is not valid or it expired".into(),
+            error_code: ApiErrorCode::RegisterInvalidEmailToken,
+            status_code: StatusCode::UNAUTHORIZED,
+        });
+    }
+
+    let user = UserData::select(claims.username, &state.pool).await?;
+    user.verify(&state.pool).await?;
+    db_email_request.delete(&state.pool).await;
+
+    tracing::info!("UPDATE /verify");
+
+    Ok(())
+}
+
 pub async fn req_email_verify(
     claims: Claims,
     State(state): State<AppState>,
 ) -> Result<(), ApiError> {
-    let mut s: String = rand::thread_rng()
+    let secret: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(60)
         .map(char::from)
@@ -73,35 +108,24 @@ pub async fn req_email_verify(
 
     let user = UserData::select(claims.username.clone(), &state.pool).await?;
 
-    let creds = Credentials::new(
-        state.settings.smtp_username.clone(),
-        state.settings.smtp_password.clone(),
-    );
-
     let email = Message::builder()
         .from("no-reply@kaytea.dev".parse().unwrap())
         .to(user.email.parse().unwrap())
         .subject("Verify your password!")
         .body(format!(
-            "Verify your email address with the following link: http://192.168.1.20:5173/verify?token={}", &s
+            "Verify your email address with the following link: http://192.168.1.20:45886/verify?token={}", &secret
         ))
         .unwrap();
 
-    let res = hash_str(&mut s)?;
     let request = EmailRequest {
         username: claims.username.clone(),
-        secret: res,
+        secret,
         operation: 0,
         expiration: chrono::Utc::now() + Duration::hours(24),
     };
     request.insert(&state.pool).await?;
 
-    let sender = SmtpTransport::relay("mail.smtp2go.com")
-        .unwrap()
-        .credentials(creds)
-        .build();
-
-    let _result = sender.send(&email).map_err(|e| {
+    let _result = state.email_sender.send(&email).map_err(|e| {
         tracing::error!("{:?}", e);
     });
 

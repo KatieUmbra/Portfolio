@@ -11,6 +11,7 @@ pub enum ApiErrorCode {
     None = 0,
     RegisterEmailExists = 1,
     RegisterUsernameExists = 2,
+    RegisterInvalidEmailToken = 3,
     LoginUsernameNotFound = 11,
     LoginWrongPassword = 12,
     InternalError = 21,

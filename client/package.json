@@ -22,11 +22,16 @@
   },
   "private": true,
   "scripts": {
-    "dev": "vite dev",
+    "dev": "vite dev --port 45886",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "prettier": "^3.3.2",
+    "prettier-plugin-svelte": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.6.5"
+  }
 }

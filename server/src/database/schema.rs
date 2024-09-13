@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{types::chrono, PgPool};
 
 use crate::util::error::{ApiError, ApiErrorCode};
 
@@ -21,7 +21,7 @@ pub struct LoginData {
     pub password: String,
 }
 
-#[derive(Serialize, sqlx::FromRow, Deserialize, Clone)]
+#[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct EmailRequest {
     pub username: String,
     pub secret: String,
@@ -105,6 +105,21 @@ impl UserData {
 
         Ok(data)
     }
+
+    pub async fn verify(&self, pool: &PgPool) -> Result<(), ApiError> {
+        let query = "UPDATE users SET verified=1 WHERE username=$1";
+        let _ = sqlx::query(query)
+            .bind(&self.username)
+            .execute(pool)
+            .await
+            .map_err(|_| ApiError {
+                message: "Internal error".into(),
+                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                error_code: ApiErrorCode::InternalErrorContactSupport,
+            })?;
+
+        Ok(())
+    }
 }
 
 impl EmailRequest {
@@ -122,8 +137,40 @@ impl EmailRequest {
         Ok(())
     }
 
-    pub async fn select(&self, _pool: &PgPool) -> Result<(), ApiError> {
-        todo!();
+    pub async fn select(&self, pool: &PgPool) -> Result<EmailRequest, ApiError> {
+        let _ = &self.verify_requests(&pool);
+        let query = "SELECT * FROM email_requests WHERE username=$1;";
+        let data = sqlx::query_as::<_, EmailRequest>(query)
+            .bind(&self.username)
+            .fetch_one(pool)
+            .await
+            .map_err(|e| {
+                tracing::error!("{:?}", e);
+                ApiError {
+                    message: "Internal Server Error (Email Requests Select)".into(),
+                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                    error_code: ApiErrorCode::None,
+                }
+            })?;
+        Ok(data)
+    }
+
+    pub async fn verify_requests(&self, pool: &PgPool) {
+        let now = chrono::Utc::now();
+        let query = "DELETE FROM email_requests WHERE username=$1 AND date<$2";
+        let _ = sqlx::query(query)
+            .bind(&self.username)
+            .bind(now)
+            .fetch(pool);
+    }
+
+    pub async fn delete(&self, pool: &PgPool) {
+        let query = "DELETE FROM email_requests WHERE username=$1 AND secret=$2";
+        let _ = sqlx::query(query)
+            .bind(&self.username)
+            .bind(&self.secret)
+            .execute(pool);
+        tracing::debug!("Delete query result: {:?}", query);
     }
 }
 

@@ -4,14 +4,23 @@
     export let form: ActionData;
 </script>
 
-<div class="grid gird-cols-1 gap-2 bg-pink-200 w-full min-h-screen items-center justify-center">
+<div
+    class="gird-cols-1 grid min-h-screen w-full items-center justify-center gap-2 bg-pink-200">
     <form action="/login" method="POST">
         <p class="m-3 text-xl font-bold">Login</p>
-        <input type="text" class="input input-bordered w-full max-w-ws m-3" name="username" placeholder="Username"/>
-        <input type="password" class="input input-bordered w-full max-w-ws m-3" name="password" placeholder="Password"/>
+        <input
+            type="text"
+            class="max-w-ws input input-bordered m-3 w-full"
+            name="username"
+            placeholder="Username" />
+        <input
+            type="password"
+            class="max-w-ws input input-bordered m-3 w-full"
+            name="password"
+            placeholder="Password" />
         <button type="submit" class="btn m-3">Submit</button>
-    {#if form?.failure}
-        <p class="m-3">{form?.message}</p>
-    {/if}
+        {#if form?.failure}
+            <p class="m-3">{form?.message}</p>
+        {/if}
     </form>
 </div>

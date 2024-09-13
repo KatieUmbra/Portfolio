@@ -4,6 +4,7 @@ pub mod util;
 
 use crate::routing::routes::user::{info, login, register, req_email_verify};
 use crate::util::setup::AppSettings;
+use axum::routing::put;
 use axum::{
     async_trait,
     extract::{FromRef, FromRequestParts},
@@ -13,12 +14,16 @@ use axum::{
 };
 use database::schema::LoginData;
 use dotenv::dotenv;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::SmtpTransport;
+use routing::routes::user::verify;
 use sqlx::PgPool;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[derive(Clone, Debug)]
 pub struct AppState {
     pub pool: PgPool,
+    pub email_sender: SmtpTransport,
     pub settings: AppSettings,
 }
 
@@ -51,8 +56,19 @@ async fn main() -> anyhow::Result<()> {
 
     let pool = sqlx::postgres::PgPool::connect(&settings.db_url).await?;
     sqlx::migrate!("./migrations").run(&pool).await?;
+
+    let creds = Credentials::new(
+        settings.smtp_username.clone(),
+        settings.smtp_password.clone(),
+    );
+
+    let email_sender = SmtpTransport::relay("mail.smtp2go.com")?
+        .credentials(creds)
+        .build();
+
     let state = AppState {
         pool,
+        email_sender,
         settings: settings.clone(),
     };
     let router = Router::new()
@@ -60,6 +76,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/register", post(register))
         .route("/info", get(info))
         .route("/reqEmailVerify", post(req_email_verify))
+        .route("/verify", put(verify))
         .with_state(state);
 
     let bind_address = settings.host + ":" + &settings.port;

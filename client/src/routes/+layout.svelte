@@ -1,5 +1,5 @@
 <script lang="ts">
-   import "../app.css";
+    import "../app.css";
 </script>
 
 <a href="login">Login</a>
@@ -7,4 +7,4 @@
 <a href="info">Info</a>
 <a href="blog">Blog</a>
 
-<slot/>
+<slot />
