@@ -5,8 +5,8 @@ use crate::{
         error::{ApiError, ApiErrorCode},
         jwt::Claims,
         password::{hash_str, verify_str},
+        state::AppState,
     },
-    AppState,
 };
 use ::chrono::Duration;
 use axum::{debug_handler, extract::State, http::StatusCode, Json};
@@ -17,7 +17,8 @@ use sqlx::types::chrono;
 
 use super::structs::Token;
 
-#[debug_handler]
+/// `POST /register` that accepts a json version of [UserData] and registers said user into the
+/// database
 pub async fn register(
     State(state): State<AppState>,
     Json(mut user): Json<UserData>,
@@ -29,6 +30,8 @@ pub async fn register(
     Ok(())
 }
 
+/// `POST /login` that accepts a json version of [LoginData] and returns a json web token of the
+/// user if the password comparison is successful
 pub async fn login(
     State(state): State<AppState>,
     Json(mut user): Json<LoginData>,
@@ -40,7 +43,7 @@ pub async fn login(
         status_code: StatusCode::UNAUTHORIZED,
     });
     let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
-    let claims = Claims::new(&data);
+    let claims = Claims::new(&data, 2);
     let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
         message: "An internal error has occurred, please contact support".into(),
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
@@ -51,6 +54,7 @@ pub async fn login(
     Ok(axum::Json(Token { token }))
 }
 
+/// `GET /info` is a test function for protected routes
 pub async fn info(claims: Claims) -> Result<String, ApiError> {
     tracing::info!("GET /info {}", claims.username);
     Ok(format!(
@@ -58,6 +62,8 @@ pub async fn info(claims: Claims) -> Result<String, ApiError> {
     ))
 }
 
+/// `PUT /verify` is a protected route that accepts an email token and updates a user's status to
+/// verified
 #[debug_handler]
 pub async fn verify(
     claims: Claims,
@@ -82,11 +88,13 @@ pub async fn verify(
     user.verify(&state.pool).await?;
     db_email_request.delete(&state.pool).await;
 
-    tracing::info!("UPDATE /verify");
+    tracing::info!("PUT /verify");
 
     Ok(())
 }
 
+/// `GET /reqEmailVerify` is a protected route that sends an email that allows the user to change
+/// it's status to verified.
 pub async fn req_email_verify(
     claims: Claims,
     State(state): State<AppState>,
@@ -121,7 +129,7 @@ pub async fn req_email_verify(
         tracing::error!("{:?}", e);
     });
 
-    tracing::info!("POST /reqEmailVerify");
+    tracing::info!("GET /reqEmailVerify");
 
     Ok(())
 }

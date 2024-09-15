@@ -7,6 +7,7 @@ use crate::{
     util::error::{ApiError, ApiErrorCode},
 };
 
+/// Contains user data
 #[derive(Serialize, Deserialize, sqlx::FromRow, Debug, Clone)]
 pub struct UserData {
     pub username: String,
@@ -17,6 +18,9 @@ pub struct UserData {
 }
 
 impl UserData {
+    /// Inserts a new user into the database
+    /// ## Note
+    /// **The password of any user that is to be inserted into the database has to be hashed**
     pub async fn insert(&self, pool: &PgPool) -> Result<(), ApiError> {
         let query =
         "INSERT INTO users (username, displayUsername, displayName, email, password, verified) VALUES ($1, $2, $3, $4, $5, $6)";
@@ -34,6 +38,7 @@ impl UserData {
         Ok(())
     }
 
+    /// Selects **one** user from the database querying by the username
     pub async fn select(username: String, pool: &PgPool) -> Result<Self, ApiError> {
         let query = "SELECT * FROM users WHERE username=$1";
         let data = sqlx::query_as::<_, Self>(query)
@@ -53,6 +58,7 @@ impl UserData {
         Ok(data)
     }
 
+    /// Changes the database field `verified` from `2` to `1`
     pub async fn verify(&self, pool: &PgPool) -> Result<(), ApiError> {
         let query = "UPDATE users SET verified=1 WHERE username=$1";
         let _ = sqlx::query(query)

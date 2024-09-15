@@ -1,3 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: #FBC8E2;
+    border-right-color: #744855;
+    border-bottom-color: #744855;
+    background: transparent;
+    border-radius: 1px;
+    div {
+        border-width: 2px;
+        border-style: outset;
+        border-color: #ffd8e7;
+        border-right-color: #D2B0B0;
+        border-bottom-color: #D2B0B0;
+        background: transparent;
+        color: black;
+        padding: 4px;
+    }
+}
+
+.btn95:hover {
+    border: 2px inset #DDD !important;
+    background: #ffffffAA;
+    div {
+        border: 2px inset #AAA !important;
+        color: #444;
+    }
+}
+
+.btn95:focus {
+    border: 2px inset #DDD !important;
+    background: #ffffffAA;
+    outline: 0 !important;
+    div {
+        border: 2px inset #AAA !important;
+        color: #444;
+    }
+}
+
+.txt-in95 {
+    border-width: 2px;
+    border-style: inset;
+    border-color: black;
+    background: white;
+    border-radius: 1px;
+    padding: 4px;
+    max-width: 100%;
+}
+
+.bg-95 {
+    background-color: #E2C1D2;
+}
+
+textarea:focus, 
+textarea.form-control:focus, 
+input.form-control:focus, 
+input[type=text]:focus, 
+input[type=password]:focus, 
+input[type=email]:focus, 
+input[type=number]:focus, 
+[type=text].form-control:focus, 
+[type=password].form-control:focus, 
+[type=email].form-control:focus, 
+[type=tel].form-control:focus, 
+[contenteditable].form-control:focus {
+    outline: 0 !important;
+}

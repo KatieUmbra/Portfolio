@@ -4,6 +4,7 @@ use axum::http::StatusCode;
 
 use crate::util::error::{ApiError, ApiErrorCode};
 
+/// Turns some sqlx error messages into a more digestible [ApiError] messages
 pub fn user_db_map_error(error: sqlx::Error) -> ApiError {
     let err1 = ApiError {
         status_code: StatusCode::INTERNAL_SERVER_ERROR,

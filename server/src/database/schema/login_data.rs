@@ -4,6 +4,7 @@ use sqlx::PgPool;
 
 use crate::util::error::{ApiError, ApiErrorCode};
 
+/// Struct that contains login data from users that call this route
 #[derive(Serialize, sqlx::FromRow, Deserialize, Clone)]
 pub struct LoginData {
     pub username: String,
@@ -11,6 +12,7 @@ pub struct LoginData {
 }
 
 impl LoginData {
+    /// Selects **one** user from the database
     pub async fn select(&self, pool: &PgPool) -> Result<LoginData, ApiError> {
         let query = "SELECT * FROM users WHERE username=$1";
         let data = sqlx::query_as::<_, LoginData>(query)
