@@ -11,12 +11,13 @@ export const actions = {
 
         const req = await fetch("http://192.168.1.20:8081/login", {
             method: "POST",
-            mode: "cors",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(formData),
         });
+
+        console.log(req.body);
 
         let json = await req.json();
         if (!req.ok) {
@@ -24,6 +25,7 @@ export const actions = {
         }
         const jwt = await json;
 
+        // remove `maxAge` to make the cookie non persistent
         cookies.set("token", jwt.token, { path: "/", maxAge: 86400 });
         return { failure: false };
     },

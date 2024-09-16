@@ -1,5 +1,6 @@
+import {fail} from "@sveltejs/kit";
+
 export async function load({ url, cookies }) {
-    console.log("verifying token...");
     const auth_token = cookies.get("token");
     const verification_token = {
         veri_token: url.searchParams.get("token"),
@@ -7,6 +8,7 @@ export async function load({ url, cookies }) {
 
     const request = await fetch("http://192.168.1.20:8081/verify", {
         method: "PUT",
+        mode: "cors",
         headers: {
             Authorization: "Bearer " + auth_token,
             "Content-Type": "application/json",
@@ -14,8 +16,14 @@ export async function load({ url, cookies }) {
         body: JSON.stringify(verification_token),
     })
 
-    const info = await request.text();
-    const status =  request.status;
+    let json = await request.json();
+    if (!request.ok) {
+        return fail(request.status, { ...json, failure: true });
+    }
+    const jwt = await json;
 
-    return { status };
+    cookies.set("token", jwt.token, { path: "/" });
+    const info = "Your account has been verified!";
+
+    return { info };
 }

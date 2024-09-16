@@ -18,7 +18,7 @@ use crate::{database::schema::login_data::LoginData, util::state::AppState};
 /// Struct containing the data that will become a json web token (JWT)
 /// ## Notes
 /// See also [Claims::from_request_parts]
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Claims {
     /// Username of the user who owns the json web token
     pub username: String,
@@ -60,10 +60,10 @@ impl Display for Claims {
 
 impl Claims {
     /// Constructor for the claims struct
-    pub fn new(user: &LoginData, rank: i32) -> Claims {
+    pub fn new(user: &LoginData) -> Claims {
         Claims {
             username: user.username.clone(),
-            rank,
+            rank: user.verified.clone(),
             iat: chrono::Utc::now().timestamp() as usize,
             exp: (chrono::Utc::now() + chrono::Duration::hours(24)).timestamp() as usize,
         }

@@ -5,10 +5,12 @@ use sqlx::PgPool;
 use crate::util::error::{ApiError, ApiErrorCode};
 
 /// Struct that contains login data from users that call this route
-#[derive(Serialize, sqlx::FromRow, Deserialize, Clone)]
+#[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct LoginData {
     pub username: String,
     pub password: String,
+    #[serde(skip)]
+    pub verified: i32,
 }
 
 impl LoginData {

@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Utility struct that is used to extract a json web token from a request part
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct Token {
     pub token: String,
 }

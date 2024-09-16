@@ -27,25 +27,35 @@ pub struct EmailRequest {
 impl EmailRequest {
     /// Inserts a request into the database
     pub async fn insert(&self, pool: &PgPool) -> Result<(), ApiError> {
-        let query = "INSERT INTO email_requests (username, secret, operation, expiration) VALUES ($1, $2, $3, $4);";
-        let _ = sqlx::query(query)
-            .bind(&self.username.to_lowercase())
-            .bind(&self.secret)
-            .bind(&self.operation)
-            .bind(&self.expiration)
-            .execute(pool)
-            .await
-            .map_err(user_db_map_error)?;
+        let old_request = self.select(pool).await;
+        if let Err(_) = old_request {
+            let query = "INSERT INTO email_requests (username, secret, operation, expiration) VALUES ($1, $2, $3, $4);";
+            let _ = sqlx::query(query)
+                .bind(&self.username.to_lowercase())
+                .bind(&self.secret)
+                .bind(&self.operation)
+                .bind(&self.expiration)
+                .execute(pool)
+                .await
+                .map_err(user_db_map_error)?;
 
-        Ok(())
+            Ok(())
+        } else {
+            Err(ApiError {
+                message: "There are email requests pending in the database".into(),
+                status_code: StatusCode::BAD_REQUEST,
+                error_code: ApiErrorCode::InternalUnspecifiedError,
+            })
+        }
     }
 
     /// Selects **one** email request from the database using the username
     pub async fn select(&self, pool: &PgPool) -> Result<EmailRequest, ApiError> {
         let _ = &self.verify_requests(&pool);
-        let query = "SELECT * FROM email_requests WHERE username=$1;";
+        let query = "SELECT * FROM email_requests WHERE username=$1 AND operation=$2";
         let data = sqlx::query_as::<_, EmailRequest>(query)
             .bind(&self.username)
+            .bind(&self.operation)
             .fetch_one(pool)
             .await
             .map_err(|e| {

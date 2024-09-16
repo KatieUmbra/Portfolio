@@ -43,13 +43,17 @@ pub async fn login(
         status_code: StatusCode::UNAUTHORIZED,
     });
     let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
-    let claims = Claims::new(&data, 2);
+    let claims = Claims::new(&data);
     let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
         message: "An internal error has occurred, please contact support".into(),
         status_code: StatusCode::INTERNAL_SERVER_ERROR,
         error_code: ApiErrorCode::InternalErrorContactSupport,
     })?;
     tracing::info!("POST /login {}", user.username);
+
+    if claims.rank == 2 {
+        let _ = req_email_verify(claims.clone(), axum::extract::State(state)).await;
+    }
 
     Ok(axum::Json(Token { token }))
 }
@@ -69,7 +73,8 @@ pub async fn verify(
     claims: Claims,
     State(state): State<AppState>,
     Json(token): Json<EmailToken>,
-) -> Result<(), ApiError> {
+) -> Result<Json<Token>, ApiError> {
+    tracing::info!("PUT /verify");
     let db_email_req_dummy = EmailRequest {
         username: claims.username.clone(),
         ..Default::default()
@@ -84,13 +89,13 @@ pub async fn verify(
         });
     }
 
-    let user = UserData::select(claims.username, &state.pool).await?;
+    let user = UserData::select(claims.username.clone(), &state.pool).await?;
     user.verify(&state.pool).await?;
     db_email_request.delete(&state.pool).await;
 
-    tracing::info!("PUT /verify");
+    let jwt = update_jwt(claims, axum::extract::State(state)).await?;
 
-    Ok(())
+    Ok(jwt)
 }
 
 /// `GET /reqEmailVerify` is a protected route that sends an email that allows the user to change
@@ -112,7 +117,7 @@ pub async fn req_email_verify(
         .to(user.email.parse().unwrap())
         .subject("Verify your password!")
         .body(format!(
-            "Verify your email address with the following link: http://192.168.1.20:45886/verify?token={}", &secret
+            "Verify your email address with the following link: http://localhost:45886/verify?token={}", &secret
         ))
         .unwrap();
 
@@ -132,4 +137,25 @@ pub async fn req_email_verify(
     tracing::info!("GET /reqEmailVerify");
 
     Ok(())
+}
+
+/// `GET /updateJwt` is a protected route that returns an updated version of a jwt
+pub async fn update_jwt(
+    claims: Claims,
+    State(state): State<AppState>,
+) -> Result<Json<Token>, ApiError> {
+    let user = LoginData {
+        username: claims.username,
+        ..Default::default()
+    };
+    let data = user.select(&state.pool).await?;
+    let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
+    let claims = Claims::new(&data);
+    let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
+        message: "An internal error has occurred, please contact support".into(),
+        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        error_code: ApiErrorCode::InternalErrorContactSupport,
+    })?;
+    tracing::info!("POST /update_jwt {}", user.username);
+    Ok(axum::Json(Token { token }))
 }
