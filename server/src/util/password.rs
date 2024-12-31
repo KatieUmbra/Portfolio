@@ -5,6 +5,7 @@ use argon2::{
 };
 use axum::http::StatusCode;
 use zeroize::Zeroize;
+use zxcvbn::zxcvbn;
 
 use super::error::{ApiError, ApiErrorCode};
 
@@ -45,5 +46,25 @@ pub fn verify_str(hashed: &String, user: &mut LoginData) -> Result<(), ApiError>
             status_code: StatusCode::BAD_REQUEST,
         })?;
     user.password.zeroize();
+    Ok(())
+}
+
+/// Verifies that an unhashed password string implements the following requirements:
+/// - is at least 8 characters long
+/// - is less than 40 characters long
+/// - contains at least 1 special character (!@#$%^&*()-=_+)
+/// - contains at least 1 lowercase letter
+/// - contains at least 1 uppercase letter
+pub fn verify_password_requirements(password: &String) -> Result<(), ApiError> {
+    let estimate = zxcvbn(password, &[]);
+    let score: u8 = estimate.score().into();
+    if score < 3 {
+        return Err(ApiError {
+            message: "Password is too insecure!".into(),
+            status_code: StatusCode::BAD_REQUEST,
+            error_code: ApiErrorCode::RegisterInsecurePassword,
+        });
+    }
+    println!("password score: {}", estimate.score());
     Ok(())
 }

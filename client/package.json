@@ -30,6 +30,7 @@
   },
   "type": "module",
   "dependencies": {
+    "caniuse-lite": "^1.0.30001690",
     "prettier": "^3.3.2",
     "prettier-plugin-svelte": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.6.5"

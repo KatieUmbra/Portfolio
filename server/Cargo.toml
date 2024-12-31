@@ -12,10 +12,10 @@ repository = "github.com/KatieUmbra/Portfolio"
 anyhow = "1"
 axum = { version = "0.7", features = ["macros"] }
 axum-extra = { version = "0.9", features = ["typed-header"]}
-tower = "0.4"
-tower-http = { version = "0.5", features = ["trace"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace"] }
 tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls", "chrono"]}
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls", "chrono"]}
 lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1-rustls-tls", "hostname", "builder"] }
 
 # Data
@@ -30,7 +30,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Crypto
-argon2 = "0.5"
+argon2 = "0.5.3"
 aes-gcm = "0.10"
 password-hash = "0.5"
 zeroize = "1.8"
+zxcvbn = "3.1"

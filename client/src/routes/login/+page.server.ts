@@ -9,7 +9,7 @@ export const actions = {
             password: data.get("password"),
         };
 
-        const req = await fetch("http://192.168.1.20:8081/login", {
+        const req = await fetch("http://localhost:8081/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

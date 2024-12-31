@@ -6,7 +6,7 @@ export async function load({ url, cookies }) {
         veri_token: url.searchParams.get("token"),
     };
 
-    const request = await fetch("http://192.168.1.20:8081/verify", {
+    const request = await fetch("http://localhost:8081/verify", {
         method: "PUT",
         mode: "cors",
         headers: {

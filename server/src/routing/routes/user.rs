@@ -4,7 +4,7 @@ use crate::{
     util::{
         error::{ApiError, ApiErrorCode},
         jwt::Claims,
-        password::{hash_str, verify_str},
+        password::{hash_str, verify_password_requirements, verify_str},
         state::AppState,
     },
 };
@@ -23,6 +23,7 @@ pub async fn register(
     State(state): State<AppState>,
     Json(mut user): Json<UserData>,
 ) -> Result<(), ApiError> {
+    verify_password_requirements(&user.password)?;
     user.password = hash_str(&mut user.password)?;
     user.insert(&state.pool).await?;
     tracing::info!("POST /register {}", user.username);
@@ -37,11 +38,7 @@ pub async fn login(
     Json(mut user): Json<LoginData>,
 ) -> Result<Json<Token>, ApiError> {
     let data = user.select(&state.pool).await?;
-    let _ = verify_str(&data.password, &mut user).map_err(|_| ApiError {
-        message: "The provided password is incorrect, try again or reset your password".into(),
-        error_code: ApiErrorCode::LoginWrongPassword,
-        status_code: StatusCode::UNAUTHORIZED,
-    });
+    verify_str(&data.password, &mut user)?;
     let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
     let claims = Claims::new(&data);
     let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
@@ -68,7 +65,6 @@ pub async fn info(claims: Claims) -> Result<String, ApiError> {
 
 /// `PUT /verify` is a protected route that accepts an email token and updates a user's status to
 /// verified
-#[debug_handler]
 pub async fn verify(
     claims: Claims,
     State(state): State<AppState>,
