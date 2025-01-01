@@ -15,14 +15,11 @@ use lettre::{Message, Transport};
 use rand::{distributions::Alphanumeric, Rng};
 use sqlx::types::chrono;
 
-use super::structs::Token;
+use super::structs::{ApiResult, Token};
 
 /// `POST /register` that accepts a json version of [UserData] and registers said user into the
 /// database
-pub async fn register(
-    State(state): State<AppState>,
-    Json(mut user): Json<UserData>,
-) -> Result<(), ApiError> {
+pub async fn register(State(state): State<AppState>, Json(mut user): Json<UserData>) -> ApiResult {
     verify_password_requirements(&user.password)?;
     user.password = hash_str(&mut user.password)?;
     user.insert(&state.pool).await?;
@@ -96,10 +93,7 @@ pub async fn verify(
 
 /// `GET /reqEmailVerify` is a protected route that sends an email that allows the user to change
 /// it's status to verified.
-pub async fn req_email_verify(
-    claims: Claims,
-    State(state): State<AppState>,
-) -> Result<(), ApiError> {
+pub async fn req_email_verify(claims: Claims, State(state): State<AppState>) -> ApiResult {
     let secret: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(60)

@@ -20,6 +20,8 @@ pub enum ApiErrorCode {
     InternalErrorContactSupport = 22,
     InternalUnspecifiedError = 23,
     UtilMismatchString = 31,
+    BlogUnauthorized = 41,
+    AccountUnverified = 51,
 }
 
 /// Struct used for api errors
