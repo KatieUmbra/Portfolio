@@ -9,7 +9,7 @@ use crate::{
     },
 };
 use ::chrono::Duration;
-use axum::{debug_handler, extract::State, http::StatusCode, Json};
+use axum::{extract::State, http::StatusCode, Json};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use lettre::{Message, Transport};
 use rand::{distributions::Alphanumeric, Rng};

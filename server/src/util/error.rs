@@ -19,6 +19,7 @@ pub enum ApiErrorCode {
     InternalError = 21,
     InternalErrorContactSupport = 22,
     InternalUnspecifiedError = 23,
+    InternalNotFound = 24,
     UtilMismatchString = 31,
     BlogUnauthorized = 41,
     AccountUnverified = 51,
