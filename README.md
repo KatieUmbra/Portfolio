@@ -82,8 +82,8 @@ You can contact me with the name "Katherine" (She/They)
 
 ## Acknowledgements
 
-<<<<<<< HEAD
 - [This readme is based on this](https://github.com/othneildrew/Best-README-Template)
+- [I got the font here](https://www.dafont.com/w95fa.font)
 
 [Contributors]: https://img.shields.io/github/contributors/KatieUmbra/Portfolio?color=blue&style=for-the-badge
 [Forks]: https://img.shields.io/github/forks/KatieUmbra/Portfolio?style=for-the-badge
@@ -98,7 +98,3 @@ You can contact me with the name "Katherine" (She/They)
 [Issues-url]: https://github.com/KatieUmbra/Portfolio/issues
 [License-url]: https://mit-license.org/
 [PullRequests-url]: https://github.com/KatieUmbra/Portfolio/pulls
-=======
-- [This readme is heavily inspired on this][https://github.com/othneildrew/Best-README-Template]
-- [I got the font here][https://www.dafont.com/w95fa.font]
->>>>>>> e2c984d (fix: README.md font attribution)
