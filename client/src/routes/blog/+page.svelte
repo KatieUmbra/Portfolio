@@ -1,13 +1,21 @@
 <script lang="ts">
-    import DOMPurify from "isomorphic-dompurify";
-    import { Carta, MarkdownEditor } from "carta-md";
+    import type { PageData } from "./$types";
+    import "../../app.css";
 
-    const carta = new Carta({
-        sanitizer: DOMPurify.sanitize,
-        theme: "github-light",
-    });
-
-    let value = "";
+    let { data }: { data: PageData } = $props();
+    console.log(data);
 </script>
 
-<MarkdownEditor {carta} bind:value />
+
+<div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
+    {#each data.posts as element}
+    <div class="m-3 p-2 grid bg-white">
+        <a href={"/blog/posts?id=" + element.id} class="min-w-40vw m-1 text-xl font-bold">{element.title}</a>
+        <p class="txt95 m-1">{element.description}</p>
+        <div class="flex">
+            <p class="txt95 m-1">by: <b>{element.creator}</b></p>
+            <p class="txt95 m-1">Likes: {element.likes}</p>
+        </div>
+    </div>
+    {/each}
+</div>

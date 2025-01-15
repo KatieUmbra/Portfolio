@@ -6,7 +6,7 @@ use axum::{
 use crate::util::state::AppState;
 
 use super::routes::{
-    blog::{get_post, post_to_blog},
+    blog::{get_latest, get_post, post_to_blog},
     user::*,
 };
 
@@ -21,6 +21,7 @@ pub fn init_router(state: AppState) -> Router {
         .route("/updateJwt", get(update_jwt))
         .route("/blog/post", post(post_to_blog))
         .route("/blog/get", get(get_post))
+        .route("/blog/get_latest", get(get_latest))
         .route("/blog/delete", delete(super::routes::blog::delete))
         .with_state(state)
 }

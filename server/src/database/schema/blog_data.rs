@@ -14,6 +14,7 @@ use crate::{
 
 #[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct Post {
+    pub id: i32,
     pub creator: String,
     #[sqlx(default)]
     pub content: String,
@@ -21,6 +22,13 @@ pub struct Post {
     pub title: String,
     pub creation: chrono::DateTime<chrono::Utc>,
     pub likes: i32,
+}
+
+#[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
+pub struct PostData {
+    pub title: String,
+    pub description: String,
+    pub content: String,
 }
 
 #[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
@@ -34,8 +42,18 @@ pub struct Comment {
 }
 
 #[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
+pub struct VecWrapper<T> {
+    pub vec: Vec<T>,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct IdWrapper {
     pub id: i32,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
+pub struct I32Wrapper {
+    pub amount: i32,
 }
 
 impl Post {
@@ -54,7 +72,12 @@ impl Post {
             .fetch_one(pool)
             .await
             .map_err(|_| error.clone())?;
-        let html = markdown::to_html(&self.content);
+        let html = markdown::to_html_with_options(&self.content, &markdown::Options::gfm())
+            .map_err(|_| ApiError {
+                status_code: StatusCode::BAD_REQUEST,
+                error_code: ApiErrorCode::InternalUnspecifiedError,
+                message: "The markdown could not be parsed".into(),
+            })?;
         let file_path = format!("posts/{}.html", result.id);
         let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
         file.write_all(html.as_bytes()).await.map_err(|_| error)?;
@@ -93,6 +116,20 @@ impl Post {
         Ok(result)
     }
 
+    pub async fn get_latest(amount: i32, pool: &PgPool) -> Result<Vec<Post>, ApiError> {
+        let query = "SELECT * FROM posts ORDER BY creation FETCH FIRST $1 ROWS ONLY";
+        let data = sqlx::query_as::<_, Post>(query)
+            .bind(amount)
+            .fetch_all(pool)
+            .await
+            .map_err(|_| ApiError {
+                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                error_code: ApiErrorCode::InternalUnspecifiedError,
+                message: "An internal error has occurred, please contact support".into(),
+            })?;
+        Ok(data)
+    }
+
     pub async fn delete(id: i32, pool: &PgPool) -> ApiResult {
         let query = "DELETE FROM posts WHERE id = $1;";
         let _ = sqlx::query(query)
@@ -114,5 +151,19 @@ impl Post {
             }
         }
         Ok(())
+    }
+}
+
+impl From<PostData> for Post {
+    fn from(it: PostData) -> Post {
+        Post {
+            id: 0,
+            title: it.title,
+            description: it.description,
+            content: it.content,
+            creator: "".into(),
+            likes: 0,
+            creation: Utc::now(),
+        }
     }
 }

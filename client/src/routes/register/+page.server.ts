@@ -9,7 +9,12 @@ export const actions = {
             display_name: data.get("displayName"),
             email: data.get("email"),
             password: data.get("password"),
+            verify: data.get("verifyPassword")
         };
+
+        if (formData.password != formData.verify) {
+            return fail(500, {message: "Passwords do not match!", failure: true})
+        }
 
         const req = await fetch("http://localhost:8081/register", {
             method: "POST",

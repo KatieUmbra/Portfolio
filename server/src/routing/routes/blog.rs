@@ -1,7 +1,11 @@
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{
+    extract::{Query, State},
+    http::StatusCode,
+    Json,
+};
 
 use crate::{
-    database::schema::blog_data::{IdWrapper, Post},
+    database::schema::blog_data::{I32Wrapper, IdWrapper, Post, PostData, VecWrapper},
     util::{
         error::{ApiError, ApiErrorCode},
         jwt::Claims,
@@ -14,7 +18,7 @@ use super::structs::ApiResult;
 pub async fn post_to_blog(
     State(state): State<AppState>,
     claims: Claims,
-    Json(mut post_data): Json<Post>,
+    Json(post_data): Json<PostData>,
 ) -> Result<(), ApiError> {
     if claims.rank != 0 {
         return Err(ApiError {
@@ -23,17 +27,26 @@ pub async fn post_to_blog(
             error_code: ApiErrorCode::BlogUnauthorized,
         });
     }
-    post_data.creator = claims.username.clone();
-    post_data.create(&state.pool).await?;
+    let mut post: Post = post_data.into();
+    post.creator = claims.username.clone();
+    post.create(&state.pool).await?;
     tracing::info!("POST /blog/post {}", claims.username);
     Ok(())
 }
 
 pub async fn get_post(
     State(state): State<AppState>,
-    Json(id): Json<IdWrapper>,
+    id: Query<IdWrapper>,
 ) -> Result<Json<Post>, ApiError> {
     Ok(Json(Post::get(id.id, &state.pool).await?))
+}
+
+pub async fn get_latest(
+    State(state): State<AppState>,
+    it: Query<I32Wrapper>,
+) -> Result<Json<VecWrapper<Post>>, ApiError> {
+    let latest = Post::get_latest(it.amount, &state.pool).await?;
+    Ok(Json(VecWrapper { vec: latest }))
 }
 
 pub async fn comment(claims: Claims) -> ApiResult {

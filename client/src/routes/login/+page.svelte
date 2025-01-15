@@ -1,24 +1,27 @@
 <script lang="ts">
     import type { ActionData } from "./$types";
 
-    export let form: ActionData;
+    interface Props {
+        form: ActionData;
+    }
+
+    let { form }: Props = $props();
 </script>
 
-<div
-    class="gird-cols-1 grid min-h-screen w-full items-center justify-center gap-2 bg-pink-200">
-    <form action="/login" method="POST">
+<div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
+    <form action="/login" method="POST" class="grid bg-white">
         <p class="m-3 text-xl font-bold">Login</p>
         <input
             type="text"
-            class="max-w-ws input input-bordered m-3 w-full"
+            class="txt-in95 m-3"
             name="username"
             placeholder="Username" />
         <input
             type="password"
-            class="max-w-ws input input-bordered m-3 w-full"
+            class="txt-in95 m-3"
             name="password"
             placeholder="Password" />
-        <button type="submit" class="btn m-3">Submit</button>
+        <button type="submit" class="btn95 m-3">Submit</button>
         {#if form?.failure}
             <p class="m-3">{form?.message}</p>
         {/if}

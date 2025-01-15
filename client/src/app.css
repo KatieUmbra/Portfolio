@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.max-h-95 {
+    max-height: 95lvh;
+}
+
+.min-h-95 {
+    min-height: 95lvh;
+}
+.min-w-40vw {
+    min-width: 40vw;
+}
+
 .btn95 {
     border-width: 2px;
     border-style: outset;
@@ -49,6 +60,14 @@
     border-radius: 1px;
     padding: 4px;
     max-width: 100%;
+}
+
+.txt95 {
+    border-width: 2px;
+    border-style: inset;
+    border-color: black;
+    background: #E0E0E0;
+    border-radius: 2px;
 }
 
 .bg-95 {
