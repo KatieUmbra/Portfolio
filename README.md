@@ -34,6 +34,8 @@ TODO
 
 ### Tools used
 
+[![Tech Stack](https://skillicons.dev/icons?i=aws,gcp,azure,react,vue,flutter&perline=3)](https://skillicons.dev)
+
 TODO
 
 <!-- Add software used thingies below here  -->
@@ -61,10 +63,10 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-You can contact me with the name "Katherine" 
+You can contact me with the name "Katherine" (She/They)
 - Email: `katherine@kaytea.dev`
-- Repo: `https://github.com/KatieUmbra/compxclib`
+- Repo: `https://github.com/KatieUmbra/Portfolio`
 
 ## Acknowledgements
 
-- [This readme is heavily inspired on this][README-inspiration]
+- [This readme is heavily inspired on this][https://github.com/othneildrew/Best-README-Template]
