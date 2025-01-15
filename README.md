@@ -35,7 +35,7 @@ Portfolio web app complete with a blog and authentication!
 
 ## About
 
-I made this web app to demonstrate my web development skills, it contains features that are by all means bloat but they help to illustrate all my abilities, I made this app from scratch using rust and svelte as an idenpendent developer which I think is quite impressive for my lack of real world experience and short education.
+I made this web app to demonstrate my web development skills, it contains features that are by all means bloat but they help to illustrate all my abilities, I made this app from scratch using rust and svelte as an independent developer which I think is quite impressive for my lack of real world experience and short education.
 
 In this website you can make an account to contact me, verify it with you email address, comment and like my (and my friend's) posts in the blog section and experience awe at its beauty.
 
