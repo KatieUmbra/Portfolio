@@ -17,6 +17,7 @@ tower-http = { version = "0.6", features = ["trace"] }
 tokio = { version = "1", features = ["full"] }
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-rustls", "chrono"]}
 lettre = { version = "0.11", default-features = false, features = ["smtp-transport", "tokio1-rustls-tls", "hostname", "builder"] }
+pulldown-cmark = "0.12.2"
 
 # Data
 dotenv = "0.15"
@@ -35,4 +36,3 @@ aes-gcm = "0.10"
 password-hash = "0.5"
 zeroize = "1.8"
 zxcvbn = "3.1"
-markdown = "1.0.0-alpha.21"

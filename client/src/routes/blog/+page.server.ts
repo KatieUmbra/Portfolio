@@ -16,13 +16,11 @@ export const load: PageServerLoad = async (_) => {
     try {
         json = await req.json();
         if (!req.ok) {
-            console.log(json);
-            error(404, {message: "Post couldn't be found."});
+            error(500, {message: "There has been an error"});
         }
     } catch (e) {
         if (!req.ok) {
-            console.log(req);
-            error(404, {message: "Post couldn't be found."});
+            error(500, {message: "There has been an error"});
         }
     }
 

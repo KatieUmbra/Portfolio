@@ -72,12 +72,9 @@ impl Post {
             .fetch_one(pool)
             .await
             .map_err(|_| error.clone())?;
-        let html = markdown::to_html_with_options(&self.content, &markdown::Options::gfm())
-            .map_err(|_| ApiError {
-                status_code: StatusCode::BAD_REQUEST,
-                error_code: ApiErrorCode::InternalUnspecifiedError,
-                message: "The markdown could not be parsed".into(),
-            })?;
+        let mut html: String = String::new();
+        let events = pulldown_cmark::Parser::new(&self.content);
+        pulldown_cmark::html::push_html(&mut html, events.into_iter());
         let file_path = format!("posts/{}.html", result.id);
         let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
         file.write_all(html.as_bytes()).await.map_err(|_| error)?;
@@ -86,18 +83,14 @@ impl Post {
 
     pub async fn get(id: i32, pool: &PgPool) -> Result<Post, ApiError> {
         let query = "SELECT * FROM posts WHERE id = $1";
-        tracing::debug!("id: {}", id);
         let mut result = sqlx::query_as::<_, Post>(query)
             .bind(id)
             .fetch_one(pool)
             .await
-            .map_err(|e| {
-                tracing::debug!("{:?}", e);
-                ApiError {
-                    message: "The requested post couldn't be found.".into(),
-                    status_code: StatusCode::NOT_FOUND,
-                    error_code: ApiErrorCode::InternalNotFound,
-                }
+            .map_err(|_| ApiError {
+                message: "The requested post couldn't be found.".into(),
+                status_code: StatusCode::NOT_FOUND,
+                error_code: ApiErrorCode::InternalNotFound,
             })?;
         let file_path = format!("posts/{}.html", id);
         let content_res = tokio::fs::read_to_string(file_path).await;

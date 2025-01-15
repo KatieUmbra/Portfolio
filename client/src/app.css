@@ -4,7 +4,7 @@
 
 @font-face {
     font-family: "W95FA";
-    src: url("../font/w95fa.woff") format("woff")
+    src: url("/font/w95fa.woff") format("woff")
 }
 
 * {
@@ -20,7 +20,7 @@
     min-height: 90lvh;
 }
 .min-w-40vw {
-    min-width: 40vw;
+    min-width: 60vw;
 }
 
 .btn95 {
