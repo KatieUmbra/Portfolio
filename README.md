@@ -82,7 +82,7 @@ You can contact me with the name "Katherine" (She/They)
 
 ## Acknowledgements
 
-- [This readme is heavily inspired on this][https://github.com/othneildrew/Best-README-Template]
+- [This readme is based on this](https://github.com/othneildrew/Best-README-Template)
 
 [Contributors]: https://img.shields.io/github/contributors/KatieUmbra/Portfolio?color=blue&style=for-the-badge
 [Forks]: https://img.shields.io/github/forks/KatieUmbra/Portfolio?style=for-the-badge
