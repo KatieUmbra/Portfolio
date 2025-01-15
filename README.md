@@ -5,9 +5,14 @@
 # Katherine's Portfolio
 Portfolio web app complete with a blog and authentication!
 
-TODO
-
 <!-- Add info thingies below here  -->
+
+[![contributors][Contributors]][Contributors-url]
+[![forks][Forks]][Forks-url]
+[![stars][Stars]][Stars-url]
+[![issues][Issues]][Issues-url]
+[![license][License]][License-url]
+[![pull requests][PullRequests]][PullRequests-url]
 
 </div>
 
@@ -30,21 +35,29 @@ TODO
 
 ## About
 
-TODO
+I made this web app to demonstrate my web development skills, it contains features that are by all means bloat but they help to illustrate all my abilities, I made this app from scratch using rust and svelte as an idenpendent developer which I think is quite impressive for my lack of real world experience and short education.
+
+In this website you can make an account to contact me, verify it with you email address, comment and like my (and my friend's) posts in the blog section and experience awe at its beauty.
 
 ### Tools used
 
-[![Tech Stack](https://skillicons.dev/icons?i=aws,gcp,azure,react,vue,flutter&perline=3)](https://skillicons.dev)
-
-TODO
-
-<!-- Add software used thingies below here  -->
+[![Tech Stack](https://skillicons.dev/icons?i=rust,typescript,javascript,svelte,postgres,bun,ubuntu,html,css,md&perline=5)](https://skillicons.dev)
 
 ## Roadmap
 
-- [X] This is a
-- [ ] Roadmap
-  - [X] Example
+- [ ] Blog
+  - [X] Posts
+  - [ ] Comments
+  - [ ] Likes
+- [ ] Accounts
+  - [X] Registration
+  - [X] Login
+  - [X] Email Verification
+  - [ ] Password Update
+  - [ ] Account deletion
+  - [ ] Username Changing
+  - [ ] Display username changing
+- [ ] Portfolio
 
 ## Contributing
 
@@ -70,3 +83,17 @@ You can contact me with the name "Katherine" (She/They)
 ## Acknowledgements
 
 - [This readme is heavily inspired on this][https://github.com/othneildrew/Best-README-Template]
+
+[Contributors]: https://img.shields.io/github/contributors/KatieUmbra/Portfolio?color=blue&style=for-the-badge
+[Forks]: https://img.shields.io/github/forks/KatieUmbra/Portfolio?style=for-the-badge
+[Stars]: https://img.shields.io/github/stars/KatieUmbra/Portfolio?style=for-the-badge
+[Issues]: https://img.shields.io/github/issues/KatieUmbra/Portfolio?style=for-the-badge
+[License]: https://img.shields.io/github/license/KatieUmbra/Portfolio?style=for-the-badge
+[PullRequests]: https://img.shields.io/github/issues-pr/KatieUmbra/Portfolio?style=for-the-badge
+
+[Contributors-url]: https://github.com/KatieUmbra/Portfolio/graphs/contributors
+[Forks-url]: https://github.com/KatieUmbra/Portfolio/network/members
+[Stars-url]: https://github.com/KatieUmbra/Portfolio
+[Issues-url]: https://github.com/KatieUmbra/Portfolio/issues
+[License-url]: https://mit-license.org/
+[PullRequests-url]: https://github.com/KatieUmbra/Portfolio/pulls
