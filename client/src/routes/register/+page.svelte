@@ -10,7 +10,8 @@
 </script>
 
 <div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
-    <form class="grid bg-white" action="/register" method="POST">
+    <form class="window95" action="/register" method="POST">
+    <div class="grid">
         <p class="m-3 text-xl font-bold">Register</p>
         <input
             type="text"
@@ -42,5 +43,6 @@
         {#if form?.failure}
             <p class="m-3">{form?.message}</p>
         {/if}
+        </div>
     </form>
 </div>

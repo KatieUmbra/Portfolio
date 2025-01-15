@@ -2,12 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: "W95FA";
+    src: url("../font/w95fa.woff") format("woff")
+}
+
+* {
+    font-family: "W95FA", serif !important;
+    font-family: "W95FA", sans-serif !important;
+}
+
 .max-h-95 {
-    max-height: 95lvh;
+    max-height: 90lvh;
 }
 
 .min-h-95 {
-    min-height: 95lvh;
+    min-height: 90lvh;
 }
 .min-w-40vw {
     min-width: 40vw;
@@ -29,7 +39,27 @@
         border-bottom-color: #D2B0B0;
         background: transparent;
         color: black;
-        padding: 4px;
+        padding: 0.25rem;
+    }
+}
+
+.window95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: #ffd8e7;
+    border-right-color: #D2B0B0;
+    border-bottom-color: #D2B0B0;
+    background: transparent;
+    border-radius: 1px;
+    > div {
+        border-width: 2px;
+        border-style: outset;
+        border-color: #FBC8E2;
+        border-right-color: #744855;
+        border-bottom-color: #744855;
+        background: transparent;
+        color: black;
+        padding: 0.25rem;
     }
 }
 
@@ -54,6 +84,7 @@
 
 .txt-in95 {
     border-width: 2px;
+    padding: 0.25rem;
     border-style: inset;
     border-color: black;
     background: white;
@@ -64,6 +95,7 @@
 
 .txt95 {
     border-width: 2px;
+    padding: 0.25rem;
     border-style: inset;
     border-color: black;
     background: #E0E0E0;

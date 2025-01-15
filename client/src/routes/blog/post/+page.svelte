@@ -31,7 +31,8 @@
 </script>
 
 <div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
-    <form class="grid w-max bg-white" method="POST">
+    <form class="w-max window95" method="POST">
+    <div class="grid">
         <p class="m-3 text-xl font-bold">Create a new post</p>
         <input
             type="text"
@@ -60,10 +61,11 @@
             </div>
         </div>
         <button type="submit" class="btn95 m-3 max-w-min">
-            <p>Submit</p>
+            <div>Submit</div>
         </button>
         {#if form?.failure}
             <p class="m-3">{form?.message}</p>
         {/if}
+    </div>
     </form>
 </div>
