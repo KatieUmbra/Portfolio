@@ -2,6 +2,8 @@
 pub mod error;
 /// Contains authentication utilities for the api
 pub mod jwt;
+/// Contains utilities for markdown operations
+pub mod markdown;
 /// Contains utilities for password checking and hashing
 pub mod password;
 /// Contains utilities for the application settings

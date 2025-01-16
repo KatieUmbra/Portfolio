@@ -1,4 +1,3 @@
-import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -17,11 +16,23 @@ export const load: PageServerLoad = async ({ url }) => {
     try {
         json = await req.json();
         if (!req.ok) {
-            error(404, {message: "Post couldn't be found."});
+            return { post: {
+                id: -1,
+                title: "Oops! 404",
+                description: `X_X post id=${id} not found`,
+                content: "<p>Next time click on a post that exists!</p>",
+                creation: "1404-04-04T16:00:00.000000Z",
+                likes: 404 } }
         }
     } catch (e) {
         if (!req.ok) {
-            error(404, {message: "Post couldn't be found."});
+            return { post: {
+                id: -1,
+                title: "Oops! 404",
+                description: `X_X post id=${id} not found`,
+                content: "<p>Next time click on a post that exists!</p>",
+                creation: "1404-04-04T0:00:00.000000Z",
+                likes: 404 } }
         }
     }
 

@@ -14,15 +14,15 @@
     const plugins = [gfmPlugin() /* { renderer: { h1: "b" } }*/];
 
     const shikiPluginPromise = createHighlighterCore({
-        themes: [import("shiki/themes/rose-pine-dawn.mjs")],
-        langs: [import("shiki/langs/rust.mjs")],
+        themes: [import("shiki/themes/light-plus.mjs")],
+        langs: [import("shiki/langs/rust.mjs"), import("shiki/langs/cpp.mjs"), import("shiki/langs/cmake.mjs"), import("shiki/langs/javascript.mjs"), import("shiki/langs/sql.mjs"), import("shiki/langs/typescript.mjs"), import("shiki/langs/c.mjs")],
         loadWasm: import("shiki/wasm"),
     }).then((highlighter): Plugin => {
         return {
             rehypePlugin: [
                 rehypeShikiFromHighlighter,
                 highlighter,
-                { theme: "rose-pine-dawn" },
+                { theme: "light-plus" },
             ],
         };
     });

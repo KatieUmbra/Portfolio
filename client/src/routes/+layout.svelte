@@ -12,3 +12,15 @@
 </div>
 
 <slot />
+
+<style>
+@font-face {
+    font-family: "W95FA";
+    src: url("$lib/font/w95fa.woff") format("woff")
+}
+
+:global(*) {
+    font-family: "W95FA", serif !important;
+    font-family: "W95FA", sans-serif !important;
+}
+</style>

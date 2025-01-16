@@ -38,6 +38,7 @@ pub async fn get_post(
     State(state): State<AppState>,
     id: Query<IdWrapper>,
 ) -> Result<Json<Post>, ApiError> {
+    tracing::info!("GET /blog/get {}", id.id);
     Ok(Json(Post::get(id.id, &state.pool).await?))
 }
 
@@ -45,6 +46,7 @@ pub async fn get_latest(
     State(state): State<AppState>,
     it: Query<I32Wrapper>,
 ) -> Result<Json<VecWrapper<Post>>, ApiError> {
+    tracing::info!("GET /blog/get_latest {}", it.amount);
     let latest = Post::get_latest(it.amount, &state.pool).await?;
     Ok(Json(VecWrapper { vec: latest }))
 }

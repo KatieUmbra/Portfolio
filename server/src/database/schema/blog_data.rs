@@ -9,7 +9,10 @@ use tokio::{
 
 use crate::{
     routing::routes::structs::ApiResult,
-    util::error::{ApiError, ApiErrorCode},
+    util::{
+        error::{ApiError, ApiErrorCode},
+        markdown::markdown_to_html,
+    },
 };
 
 #[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
@@ -72,9 +75,7 @@ impl Post {
             .fetch_one(pool)
             .await
             .map_err(|_| error.clone())?;
-        let mut html: String = String::new();
-        let events = pulldown_cmark::Parser::new(&self.content);
-        pulldown_cmark::html::push_html(&mut html, events.into_iter());
+        let html = markdown_to_html(&self.content);
         let file_path = format!("posts/{}.html", result.id);
         let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
         file.write_all(html.as_bytes()).await.map_err(|_| error)?;

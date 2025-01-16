@@ -13,12 +13,12 @@
 </script>
 
 <div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
-    <a href="/blog" class="m-3 btn95 absolute left-1.5 top-20"><div>Go back</div></a>
     <div class="m-10 window95">
     <div class="grid">
-        <div class="grid grid-cols-2">
+        <div class="flex">
+            <a href="/blog" class="m-3 btn95"><div>Go Back</div></a>
             <a href="/blog/posts?id={getId() - 1}" class="place-self-start m-3 btn95"><div>Prev</div></a>
-            <a href="/blog/posts?id={getId() + 1}" class="place-self-end m-3 btn95"><div>Next</div></a>
+            <a href="/blog/posts?id={getId() + 1}" class="ml-auto m-3 btn95"><div>Next</div></a>
         </div>
         <h1 class="txt95 m-3 text-6xl font-bold">{data.post.title}</h1>
         <p class="txt95 m-3 text-2xl">{data.post.description}</p>
@@ -31,7 +31,7 @@
                 <p class="mt-1.5 ml-3 text-2xl">{data.post.likes}</p>
             </div>
         </div>
-        <div class="markdown txt95 m-3">
+        <div class="grid place-self-center markdown txt95 m-3">
             {@html data.post.content}
         </div>
         </div>
@@ -40,7 +40,9 @@
 
 <style>
 :global(.markdown) {
-    width: 60rem;
+    max-width: 80lvw;
+    min-width: 80lvw;
+    display: grid;
     :global(*) {
         font-size: 18pt;
     }
@@ -60,7 +62,6 @@
         overflow: scroll;
         margin-top: 0.75rem;
         margin-bottom: 0.75rem;
-        padding: 0.75rem;
         background: white;
     }
     :global(img) {

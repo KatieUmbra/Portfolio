@@ -2,16 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-    font-family: "W95FA";
-    src: url("/font/w95fa.woff") format("woff")
-}
-
-* {
-    font-family: "W95FA", serif !important;
-    font-family: "W95FA", sans-serif !important;
-}
-
 .max-h-95 {
     max-height: 90lvh;
 }
