@@ -1,38 +1,47 @@
-import { fail } from "@sveltejs/kit";
-import type {Actions} from "./$types";
+import type { PageServerLoad } from "./$types";
 
-export const actions = {
-    default: async ({ request, cookies }) => {
-        const data = await request.formData();
-        const token = cookies.get("token");
+export const load: PageServerLoad = async ({ url }) => {
+    const id = url.searchParams.get("id");
 
-        const formData = {
-            title: data.get("title"),
-            description: data.get("description"),
-            content: data.get("content")
+    const req = await fetch(`http://localhost:8081/blog/get?id=${id}`, {
+        method: "GET",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
         }
+    });
 
-        const req = await fetch("http://localhost:8081/blog/post", {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-            body: JSON.stringify(formData)
-        })
+    let json;
 
-        try {
-            let json = await req.json();
-            if (!req.ok) {
-                return fail(req.status, { ...json, failure: true });
-            }
-        } catch (e) {
-            if (!req.ok) {
-                return fail(req.status, { failure: true });
+    try {
+        json = await req.json();
+        if (!req.ok) {
+            return { post: {
+                id: -1,
+                title: "Oops! 404",
+                description: `X_X post id=${id} not found`,
+                content: "<p>Next time click on a post that exists!</p>",
+                creation: "",
+                likes: 404 },
+                localTime: new Date("1404-04-04T0:00:00.000000Z")
             }
         }
-
-        return { failure: false };
+    } catch (e) {
+        if (!req.ok) {
+            return { post: {
+                id: -1,
+                title: "Oops! 404",
+                description: `X_X post id=${id} not found`,
+                content: "<p>Next time click on a post that exists!</p>",
+                creation: "",
+                likes: 404 },
+                localTime: new Date("1404-04-04T0:00:00.000000Z")
+            }
+        }
     }
-} satisfies Actions;
+
+    const parsedDate = new Date(json.creation);
+    const localTime = new Date(parsedDate.getTime() - parsedDate.getTimezoneOffset()*60*1000);
+    json.creation = parsedDate;
+    return { post: json, localTime: localTime };
+}

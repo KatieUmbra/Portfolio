@@ -111,7 +111,7 @@ impl Post {
     }
 
     pub async fn get_latest(amount: i32, pool: &PgPool) -> Result<Vec<Post>, ApiError> {
-        let query = "SELECT * FROM posts ORDER BY creation FETCH FIRST $1 ROWS ONLY";
+        let query = "SELECT * FROM posts ORDER BY creation DESC FETCH FIRST $1 ROWS ONLY";
         let data = sqlx::query_as::<_, Post>(query)
             .bind(amount)
             .fetch_all(pool)
@@ -119,7 +119,8 @@ impl Post {
             .map_err(|_| ApiError {
                 status_code: StatusCode::INTERNAL_SERVER_ERROR,
                 error_code: ApiErrorCode::InternalUnspecifiedError,
-                message: "An internal error has occurred, please contact support".into(),
+                message: "An internal error has occurred, please contact support (blog/get_latest)"
+                    .into(),
             })?;
         Ok(data)
     }
@@ -131,7 +132,8 @@ impl Post {
             .execute(pool)
             .await
             .map_err(|_| ApiError {
-                message: "An internal error has occurred, please contact support".into(),
+                message: "An internal error has occurred, please contact support (blog/delete)"
+                    .into(),
                 status_code: StatusCode::INTERNAL_SERVER_ERROR,
                 error_code: ApiErrorCode::InternalErrorContactSupport,
             })?;

@@ -24,5 +24,14 @@ export const load: PageServerLoad = async (_) => {
         }
     }
 
+    console.log(json);
+
+    json.vec.forEach((element: any) => {
+        const parsedDate = new Date(element.creation);
+        const localTime = new Date(parsedDate.getTime() - parsedDate.getTimezoneOffset()*60*1000);
+        element.localTime = localTime;
+        console.log(parsedDate);
+    });
+
     return { posts: json.vec };
 }

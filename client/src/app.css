@@ -2,32 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
+.taskbar95 {
+    min-height: 5lvh;
+    max-height: 5lvh;
+    background: #ccc;
+    border-width: 2px;
+    border-style: outset;
+    border-color: transparent;
+    border-top-color: white;
+    border-bottom-color: black;
+}
+
+.tb-btn95 {
+    border-width: 2px;
+    font-size: 13pt;
+    border-style: outset;
+    border-color: white;
+    border-right-color: black;
+    border-bottom-color: black;
+    background: transparent;
+    border-radius: 1px;
+    margin-left: 2px;
+    padding-left: 4px;
+    padding-right: 4px;
+    > img {
+        width: 1lvw;
+    }
+}
+
+.tb-btn95:hover {
+    border-color: black;
+    border-style: inset;
+    border-right-color: white;
+    border-bottom-color: white;
+    background: #ffffffAA;
+}
+
+.tb-btn95:focus {
+    border: 2px inset #DDD #CCC !important;
+    background: #ffffffAA;
+    outline: 0 !important;
+}
+
 .max-h-95 {
-    max-height: 90lvh;
+    max-height: 95lvh;
 }
 
 .min-h-95 {
-    min-height: 90lvh;
+    min-height: 95lvh;
 }
 .min-w-40vw {
     min-width: 60vw;
 }
 
+.img95 {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.border95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-bottom-color: black;
+    border-right-color: black;
+}
+
+.border95-inv {
+    border-width: 2px;
+    border-style: inset;
+    border-color: black;
+    border-bottom-color: white;
+    border-right-color: white;
+}
+
+.bg95-gray {
+    background-color: #ccc;
+}
+
+.btn95-gray {
+    margin-top: 0.25rem;
+    margin-right: 0.25rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-bottom-color: black;
+    border-right-color: black;
+    background-color: #ccc;
+}
+
+.bg-gray-ccc {
+    background: #ccc;
+}
+
 .btn95 {
     border-width: 2px;
     border-style: outset;
-    border-color: #FBC8E2;
-    border-right-color: #744855;
-    border-bottom-color: #744855;
+    border-color: white;
+    border-right-color: black;
+    border-bottom-color: black;
     background: transparent;
     border-radius: 1px;
     div {
         border-width: 2px;
         border-style: outset;
-        border-color: #ffd8e7;
-        border-right-color: #D2B0B0;
-        border-bottom-color: #D2B0B0;
-        background: transparent;
+        border-color: #dfdfdf;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        background: #c0c0c0;
         color: black;
         padding: 0.25rem;
     }
@@ -88,7 +172,7 @@
     padding: 0.25rem;
     border-style: inset;
     border-color: black;
-    background: #E0E0E0;
+    background: white;
     border-radius: 2px;
 }
 

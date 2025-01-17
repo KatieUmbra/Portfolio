@@ -47,12 +47,14 @@ In this website you can make an account to contact me, verify it with you email 
 
 - [ ] Blog
   - [X] Posts
+  - [ ] Deleting
   - [ ] Comments
   - [ ] Likes
 - [ ] Accounts
   - [X] Registration
   - [X] Login
   - [X] Email Verification
+  - [ ] Self updating cookie with permissions
   - [ ] Password Update
   - [ ] Account deletion
   - [ ] Username Changing
