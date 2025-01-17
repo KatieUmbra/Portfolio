@@ -14,10 +14,9 @@
     <title>{data.post.title}</title>
 </svelte:head>
 
-<div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
 <!--WRAPPER-->
-<div class="border95 bg95-gray max-w-8xl p-1 m-3">
-<div class="flex bg-purple-800"> <div class="mr-auto flex">
+<div class="border95 bg95-gray max-w-8xl p-1 m-5">
+<div class="flex bg-gradient95"> <div class="mr-auto flex">
 <img alt="logo of the website, it's a windows 95 styled cat coming out of a folder" class="img95 m-1" src="/assets/logo kathy dev2.png"/>
 <p class=" mt-0.5 text-white">{data.post.title}</p> </div>
 <div class="ml-auto flex">
@@ -48,18 +47,15 @@
         </div>
         </div>
     </div>
-</div> </div>
+</div>
 
 <style>
 :global(.markdown) {
     max-width: 80lvw;
     min-width: 80lvw;
     display: grid;
-    :global(*) {
-        font-size: 18pt;
-    }
     :global(h2) {
-        font-size: 35pt;
+        font-size: 24pt;
     }
     :global(a) {
         font-style: italic;
@@ -78,8 +74,14 @@
         padding: 1rem;
     }
     :global(img) {
+        border-width: 2px;
+        border-color: #eee;
+        border-top-color: black;
+        border-left-color: black;
         margin-top: 0.75rem;
         margin-bottom: 0.75rem;
+        margin: auto;
     }
 }
 </style>
+

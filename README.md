@@ -87,6 +87,7 @@ You can contact me with the name "Katherine" (She/They)
 - [This readme is based on this](https://github.com/othneildrew/Best-README-Template)
 - [I got the font here](https://www.dafont.com/w95fa.font)
 - [I utilized this article for syntax highlighting](https://bandarra.me/posts/Rust-Markdown-Syntax-Highlighting-A-Practical-Guide)
+- [App icon made by my friend](https://x.com/JulieNastika)
 
 [Contributors]: https://img.shields.io/github/contributors/KatieUmbra/Portfolio?color=blue&style=for-the-badge
 [Forks]: https://img.shields.io/github/forks/KatieUmbra/Portfolio?style=for-the-badge

@@ -8,10 +8,9 @@
     let { form }: Props = $props();
 </script>
 
-<div class="max-h-95 bg-95 grid min-h-95 w-full items-center justify-center overflow-scroll">
 <!--WRAPPER-->
 <div class="border95 bg95-gray max-w-6xl p-1">
-<div class="flex bg-purple-800"> <div class="mr-auto flex">
+<div class="flex bg-gradient95"> <div class="mr-auto flex">
 <img alt="logo of the website, it's a windows 95 styled cat coming out of a folder" class="img95 m-1" src="/assets/logo kathy dev2.png"/>
 <p class=" mt-0.5 text-white">Login</p> </div>
 <div class="ml-auto flex">
@@ -39,6 +38,5 @@
         {/if}
         </div>
     </form>
-</div>
 </div>
 </div>

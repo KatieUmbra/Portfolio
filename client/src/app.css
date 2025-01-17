@@ -13,7 +13,15 @@
     border-bottom-color: black;
 }
 
+.bg-gradient95 {
+    background: rgb(117,0,124);
+    background: linear-gradient(90deg, rgba(117,0,124,1) 0%, rgba(245,124,235,1) 100%);
+}
+
 .tb-btn95 {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
     border-width: 2px;
     font-size: 13pt;
     border-style: outset;
@@ -24,7 +32,6 @@
     border-radius: 1px;
     margin-left: 2px;
     padding-left: 4px;
-    padding-right: 4px;
     > img {
         width: 1lvw;
     }
@@ -176,8 +183,20 @@
     border-radius: 2px;
 }
 
+@keyframes scrolling {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 105% 105%;
+    }
+}
+
 .bg-95 {
-    background-color: #E2C1D2;
+    background-color: #FECAD5;
+    background-image: url("/assets/background.gif");
+    background-size: 100px;
+    animation: scrolling 30s linear infinite;
 }
 
 textarea:focus, 
