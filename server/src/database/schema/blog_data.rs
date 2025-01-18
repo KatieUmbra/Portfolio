@@ -75,10 +75,76 @@ impl Post {
             .fetch_one(pool)
             .await
             .map_err(|_| error.clone())?;
+
+        // Parsing to html
         let html = markdown_to_html(&self.content);
         let file_path = format!("posts/{}.html", result.id);
         let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
-        file.write_all(html.as_bytes()).await.map_err(|_| error)?;
+        file.write_all(html.as_bytes())
+            .await
+            .map_err(|_| error.clone())?;
+
+        // Keeping markdown copy for post editing
+        let file_path = format!("posts/{}.md", result.id);
+        let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
+        file.write_all(&self.content.as_bytes())
+            .await
+            .map_err(|_| error)?;
+        Ok(())
+    }
+
+    pub async fn update(self, id: i32, pool: &PgPool) -> ApiResult {
+        let error = ApiError {
+            message: "An internal error has occurred, please contact support".into(),
+            status_code: StatusCode::INTERNAL_SERVER_ERROR,
+            error_code: ApiErrorCode::InternalErrorContactSupport,
+        };
+        let query_username = "SELECT * FROM posts WHERE id=$1";
+        let creator = sqlx::query_as::<_, Self>(query_username)
+            .bind(id)
+            .fetch_one(pool)
+            .await
+            .map_err(|_| error.clone())?;
+
+        if self.creator != creator.creator {
+            return Err(ApiError {
+                status_code: StatusCode::UNAUTHORIZED,
+                error_code: ApiErrorCode::InternalUnspecifiedError,
+                message: "You're not the creator of this post!".into(),
+            });
+        }
+
+        let query = "UPDATE posts SET title=$1, description=$2 WHERE id=$3";
+        let _ = sqlx::query(query)
+            .bind(&self.title)
+            .bind(&self.description)
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(|_| error.clone())?;
+
+        let file_path = format!("posts/{}.html", id);
+        let file_path_new = format!("posts/{}.html.old", id);
+        let _ = std::fs::rename(file_path, file_path_new);
+
+        let file_path = format!("posts/{}.md", id);
+        let file_path_new = format!("posts/{}.md.old", id);
+        let _ = std::fs::rename(file_path, file_path_new);
+
+        // Parsing to html
+        let html = markdown_to_html(&self.content);
+        let file_path = format!("posts/{}.html", id);
+        let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
+        file.write_all(html.as_bytes())
+            .await
+            .map_err(|_| error.clone())?;
+
+        // Keeping markdown copy for post editing
+        let file_path = format!("posts/{}.md", id);
+        let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
+        file.write_all(&self.content.as_bytes())
+            .await
+            .map_err(|_| error.clone())?;
         Ok(())
     }
 
@@ -94,6 +160,34 @@ impl Post {
                 error_code: ApiErrorCode::InternalNotFound,
             })?;
         let file_path = format!("posts/{}.html", id);
+        let content_res = tokio::fs::read_to_string(file_path).await;
+        let content = match content_res {
+            Ok(x) => x,
+            Err(_) => {
+                Post::delete(id, &pool).await?;
+                return Err(ApiError {
+                    message: "The file for the post couldn't be found.".into(),
+                    status_code: StatusCode::NOT_FOUND,
+                    error_code: ApiErrorCode::InternalNotFound,
+                });
+            }
+        };
+        result.content = content;
+        Ok(result)
+    }
+
+    pub async fn get_md(id: i32, pool: &PgPool) -> Result<Post, ApiError> {
+        let query = "SELECT * FROM posts WHERE id = $1";
+        let mut result = sqlx::query_as::<_, Post>(query)
+            .bind(id)
+            .fetch_one(pool)
+            .await
+            .map_err(|_| ApiError {
+                message: "The requested post couldn't be found.".into(),
+                status_code: StatusCode::NOT_FOUND,
+                error_code: ApiErrorCode::InternalNotFound,
+            })?;
+        let file_path = format!("posts/{}.md", id);
         let content_res = tokio::fs::read_to_string(file_path).await;
         let content = match content_res {
             Ok(x) => x,

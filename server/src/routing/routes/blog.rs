@@ -42,6 +42,34 @@ pub async fn get_post(
     Ok(Json(Post::get(id.id, &state.pool).await?))
 }
 
+pub async fn get_md(
+    State(state): State<AppState>,
+    id: Query<IdWrapper>,
+) -> Result<Json<Post>, ApiError> {
+    tracing::info!("Get /blog/get_md {}", id.id);
+    Ok(Json(Post::get_md(id.id, &state.pool).await?))
+}
+
+pub async fn edit(
+    State(state): State<AppState>,
+    id: Query<IdWrapper>,
+    claims: Claims,
+    Json(post_data): Json<PostData>,
+) -> ApiResult {
+    if claims.rank != 0 {
+        return Err(ApiError {
+            message: "You're not allowed to post to this site.".into(),
+            status_code: StatusCode::UNAUTHORIZED,
+            error_code: ApiErrorCode::BlogUnauthorized,
+        });
+    }
+    let mut post: Post = post_data.into();
+    post.creator = claims.username.clone();
+    post.update(id.id, &state.pool).await?;
+    tracing::info!("PUT /blog/edit?id={} {}", id.id, claims.username);
+    Ok(())
+}
+
 pub async fn get_latest(
     State(state): State<AppState>,
     it: Query<I32Wrapper>,
