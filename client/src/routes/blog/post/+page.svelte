@@ -16,55 +16,33 @@
     <title>{data.post.title}</title>
 </svelte:head>
 
-<!--WRAPPER-->
-<div class="border95 bg95-gray max-w-8xl m-5 p-1">
-    <div class="bg-gradient95 flex">
-        <div class="mr-auto flex">
-            <img
-                alt="logo of the website, it's a windows 95 styled cat coming out of a folder"
-                class="img95 m-1"
-                src="/assets/logo kathy dev2.png" />
-            <p class=" mt-0.5 text-white">{data.post.title}</p>
-        </div>
-        <div class="ml-auto flex">
-            <div class="btn95-gray grid place-content-center">_</div>
-            <div class="btn95-gray grid place-content-center">▫</div>
-            <div class="btn95-gray grid place-content-center">⨉</div>
+<div class="grid">
+    <div class="flex">
+        <a href="/blog" class="btn95 m-3"><div>Go Back</div></a>
+        <a href="/blog/post?id={getId() - 1}" class="btn95 m-3 place-self-start"
+            ><div>&lt; Prev</div></a>
+        <a href="/blog/new_post?edit={getId()}" class="btn95 m-3 ml-auto"
+            ><div>Edit</div></a>
+        <a href="/blog/post?id={getId() + 1}" class="btn95 m-3"
+            ><div>Next &gt;</div></a>
+    </div>
+    <h1 class="txt95 m-3 text-6xl font-bold">{data.post.title}</h1>
+    <p class="txt95 m-3 text-2xl">{data.post.description}</p>
+    <div class="flex">
+        <p class="txt95 m-3 text-2xl">by: <b>{data.post.creator}</b></p>
+        <p class="txt95 m-3 text-2xl">
+            {data.localTime.toLocaleDateString()}
+        </p>
+        <p class="txt95 m-3 text-2xl">
+            {data.localTime.toLocaleTimeString()}
+        </p>
+        <div class="m-3 flex">
+            <button class="btn95 text-2xl"><div>Like</div></button>
+            <p class="ml-3 mt-1.5 text-2xl">{data.post.likes}</p>
         </div>
     </div>
-    <div class="bg-gray-ccc border95-inv mt-1">
-        <!--WRAPPER END-->
-        <div class="grid">
-            <div class="flex">
-                <a href="/blog" class="btn95 m-3"><div>Go Back</div></a>
-                <a
-                    href="/blog/post?id={getId() - 1}"
-                    class="btn95 m-3 place-self-start"><div>&lt; Prev</div></a>
-                <a
-                    href="/blog/new_post?edit={getId()}"
-                    class="btn95 m-3 ml-auto"><div>Edit</div></a>
-                <a href="/blog/post?id={getId() + 1}" class="btn95 m-3"
-                    ><div>Next &gt;</div></a>
-            </div>
-            <h1 class="txt95 m-3 text-6xl font-bold">{data.post.title}</h1>
-            <p class="txt95 m-3 text-2xl">{data.post.description}</p>
-            <div class="flex">
-                <p class="txt95 m-3 text-2xl">by: <b>{data.post.creator}</b></p>
-                <p class="txt95 m-3 text-2xl">
-                    {data.localTime.toLocaleDateString()}
-                </p>
-                <p class="txt95 m-3 text-2xl">
-                    {data.localTime.toLocaleTimeString()}
-                </p>
-                <div class="m-3 flex">
-                    <button class="btn95 text-2xl"><div>Like</div></button>
-                    <p class="ml-3 mt-1.5 text-2xl">{data.post.likes}</p>
-                </div>
-            </div>
-            <div class="markdown txt95 m-3 grid place-self-center">
-                {@html data.post.content}
-            </div>
-        </div>
+    <div class="markdown txt95 m-3 grid place-self-center">
+        {@html data.post.content}
     </div>
 </div>
 

@@ -11,13 +11,9 @@
     let description: string = $state("");
     let md: string = $state("");
 
-    interface Props {
-        form: ActionData;
-    }
+    let { form, data }: { form: ActionData; data: PageData } = $props();
 
-    let { form, data }: { form: Props; data: PageData } = $props();
-
-    const plugins = [gfmPlugin() /* { renderer: { h1: "b" } }*/];
+    const plugins = [gfmPlugin(), { renderer: { h1: "b", h2: "b", h3: "b" } }];
 
     const shikiPluginPromise = createHighlighterCore({
         themes: [import("shiki/themes/light-plus.mjs")],
@@ -61,64 +57,42 @@
     <title>New post {title}</title>
 </svelte:head>
 
-<!--WRAPPER-->
-<div class="border95 bg95-gray max-w-6xl p-1">
-    <div class="bg-gradient95 flex">
-        <div class="mr-auto flex">
-            <img
-                alt="logo of the website, it's a windows 95 styled cat coming out of a folder"
-                class="img95 m-1"
-                src="/assets/logo kathy dev2.png" />
-            <p class=" mt-0.5 text-white">home page</p>
-        </div>
-        <div class="ml-auto flex">
-            <div class="btn95-gray grid place-content-center">_</div>
-            <div class="btn95-gray grid place-content-center">▫</div>
-            <div class="btn95-gray grid place-content-center">⨉</div>
-        </div>
-    </div>
-    <div class="border95-inv mt-1 bg-white">
-        <!--WRAPPER END-->
-        <form class="bg-gray-ccc w-max" method="POST">
-            <div class="grid">
-                <p class="m-3 text-xl font-bold">Create a new post</p>
-                <input
-                    type="text"
-                    class="txt-in95 m-3"
-                    name="title"
-                    bind:value={title}
-                    placeholder="title" />
-                <input
-                    type="text"
-                    class="txt-in95 m-3"
-                    name="description"
-                    bind:value={description}
-                    placeholder="description" />
-                <div class="grid grid-cols-2 gap-2 p-3">
-                    <textarea
-                        name="content"
-                        placeholder="Post Content"
-                        class="txt-in95 h-96 w-96 min-w-full resize-none"
-                        bind:value={md}></textarea>
-                    <div class="txt95 max-h-96 w-0 min-w-full overflow-scroll">
-                        {#await shikiPluginPromise}
-                            <Markdown {md} {plugins} />
-                        {:then shikiPlugin}
-                            <Markdown
-                                {md}
-                                plugins={[shikiPlugin, ...plugins]} />
-                        {:catch}
-                            <Markdown {md} {plugins} />
-                        {/await}
-                    </div>
-                </div>
-                <button type="submit" class="btn95 m-3 max-w-min">
-                    <div>Submit</div>
-                </button>
-                {#if form?.failure}
-                    <p class="m-3">{form?.message}</p>
-                {/if}
+<form class="bg-gray-ccc w-max" method="POST">
+    <div class="grid">
+        <p class="m-3 text-xl font-bold">Create a new post</p>
+        <input
+            type="text"
+            class="txt-in95 m-3"
+            name="title"
+            bind:value={title}
+            placeholder="title" />
+        <input
+            type="text"
+            class="txt-in95 m-3"
+            name="description"
+            bind:value={description}
+            placeholder="description" />
+        <div class="grid grid-cols-2 gap-2 p-3">
+            <textarea
+                name="content"
+                placeholder="Post Content"
+                class="txt-in95 h-96 w-96 min-w-full resize-none"
+                bind:value={md}></textarea>
+            <div class="txt95 max-h-96 w-0 min-w-full overflow-scroll">
+                {#await shikiPluginPromise}
+                    <Markdown {md} {plugins} />
+                {:then shikiPlugin}
+                    <Markdown {md} plugins={[shikiPlugin, ...plugins]} />
+                {:catch}
+                    <Markdown {md} {plugins} />
+                {/await}
             </div>
-        </form>
+        </div>
+        <button type="submit" class="btn95 m-3 max-w-min">
+            <div>Submit</div>
+        </button>
+        {#if form?.failure}
+            <p class="m-3">{form?.message}</p>
+        {/if}
     </div>
-</div>
+</form>
