@@ -20,7 +20,7 @@ pub async fn post_to_blog(
     claims: Claims,
     Json(post_data): Json<PostData>,
 ) -> Result<(), ApiError> {
-    if claims.rank != 0 {
+    if claims.rank > 1 {
         return Err(ApiError {
             message: "You're not allowed to post to this site.".into(),
             status_code: StatusCode::UNAUTHORIZED,
@@ -56,7 +56,7 @@ pub async fn edit(
     claims: Claims,
     Json(post_data): Json<PostData>,
 ) -> ApiResult {
-    if claims.rank != 0 {
+    if claims.rank > 1 {
         return Err(ApiError {
             message: "You're not allowed to post to this site.".into(),
             status_code: StatusCode::UNAUTHORIZED,
@@ -80,7 +80,7 @@ pub async fn get_latest(
 }
 
 pub async fn comment(claims: Claims) -> ApiResult {
-    if claims.rank > 1 {
+    if claims.rank > 2 {
         return Err(ApiError {
             message: "You need to verify your account to do that.".into(),
             status_code: StatusCode::UNAUTHORIZED,
@@ -92,7 +92,7 @@ pub async fn comment(claims: Claims) -> ApiResult {
 }
 
 pub async fn like(claims: Claims) -> ApiResult {
-    if claims.rank > 1 {
+    if claims.rank > 2 {
         return Err(ApiError {
             message: "You need to verify your account to do that.".into(),
             status_code: StatusCode::UNAUTHORIZED,
@@ -112,7 +112,7 @@ pub async fn delete(
     id: Query<IdWrapper>,
 ) -> ApiResult {
     tracing::info!("DELETE /blog/delete user: {}", claims.username);
-    if claims.rank > 1 {
+    if claims.rank > 2 {
         Post::delete(id.id, &state.pool, Some(claims.username)).await?;
         return Err(ApiError {
             message: "You are not allowed to do that.".into(),

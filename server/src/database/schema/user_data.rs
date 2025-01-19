@@ -60,7 +60,7 @@ impl UserData {
 
     /// Changes the database field `verified` from `2` to `1`
     pub async fn verify(&self, pool: &PgPool) -> Result<(), ApiError> {
-        let query = "UPDATE users SET verified=1 WHERE username=$1";
+        let query = "UPDATE users SET verified=2 WHERE username=$1";
         let _ = sqlx::query(query)
             .bind(&self.username)
             .execute(pool)
