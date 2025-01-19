@@ -18,10 +18,8 @@ use crate::{database::schema::login_data::LoginData, util::state::AppState};
 /// Struct containing the data that will become a json web token (JWT)
 /// ## Notes
 /// See also [Claims::from_request_parts]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Claims {
-    /// Username of the user who owns the json web token
-    pub username: String,
     /// Level of permission of the user who owns the json web token:
     /// - 0: Administrator of the website, is allowed to post and manage comments, plus the
     /// permissions below
@@ -30,6 +28,8 @@ pub struct Claims {
     /// below.
     /// - 3: Unverified user, is allowed to like comments and posts.
     pub rank: i32,
+    /// Username of the user who owns the json web token
+    pub username: String,
     /// Creation date of the json web token in utc.
     pub iat: usize,
     /// Expiration date of the json web token in utc.
@@ -105,6 +105,14 @@ where
 
         let token_data = decode::<Claims>(bearer.token(), &decoding_key, &Validation::default())
             .map_err(|_| StatusCode::UNAUTHORIZED)?;
+
+        let user = LoginData::select_with_username(token_data.claims.clone().username, &state.pool)
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+        if user.verified != token_data.claims.clone().rank {
+            return Err(StatusCode::CONFLICT);
+        }
 
         Ok(token_data.claims)
     }

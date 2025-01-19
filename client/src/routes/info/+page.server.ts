@@ -1,10 +1,13 @@
-import { backendRequest } from "$lib/backend/backend";
+import { backendRequest, preemptiveAuthCheck } from "$lib/backend/backend";
 import type { Claims } from "$lib/backend/schema/user";
 
-export async function load({ cookies }: any) {
+export async function load({ cookies, url }: any) {
+
+    await preemptiveAuthCheck({ url, cookies });
+
     const request = await backendRequest<Claims>("info", {
         method: "GET",
-    }, cookies.get("token"));
+    }, { token: cookies.get("token"), currentPage: url.pathname });
 
     if (request.isOk) {
         const info = request.value;

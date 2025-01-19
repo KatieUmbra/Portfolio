@@ -19,6 +19,7 @@ pub fn init_router(state: AppState) -> Router {
         .route("/reqEmailVerify", get(req_email_verify))
         .route("/verify", put(verify))
         .route("/updateJwt", get(update_jwt))
+        .route("/refreshJwt", post(refresh_jwt))
         .route("/blog/post", post(post_to_blog))
         .route("/blog/get", get(get_post))
         .route("/blog/edit", put(edit))

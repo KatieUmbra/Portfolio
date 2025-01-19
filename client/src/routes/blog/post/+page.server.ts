@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ url, cookies }: any) => {
         mode: "cors",
     });
 
-    const userRequest = await backendRequest<Claims>("info", {}, cookies.get("token"));
+    const userRequest = await backendRequest<Claims>("info", {}, { token: cookies.get("token"), currentPage: url.pathName });
 
     let currentUser: Claims | null = null;
 

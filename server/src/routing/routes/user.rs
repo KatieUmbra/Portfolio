@@ -10,7 +10,7 @@ use crate::{
 };
 use ::chrono::Duration;
 use axum::{extract::State, http::StatusCode, Json};
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use lettre::{Message, Transport};
 use rand::{distributions::Alphanumeric, Rng};
 use sqlx::types::chrono;
@@ -148,4 +148,37 @@ pub async fn update_jwt(
     })?;
     tracing::info!("POST /update_jwt {}", user.username);
     Ok(axum::Json(Token { token }))
+}
+
+/// `POST /refreshJwt` is the unprotected version of GET /updateJwt that verifies and updates the
+/// token
+pub async fn refresh_jwt(
+    State(state): State<AppState>,
+    Json(token): Json<Token>,
+) -> Result<Json<Token>, ApiError> {
+    tracing::info!("POST /refreshJwt");
+    let decoding_key = DecodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
+    let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
+
+    let token_data = decode::<Claims>(&*token.token, &decoding_key, &Validation::default())
+        .map_err(|_| ApiError {
+            status_code: StatusCode::UNAUTHORIZED,
+            error_code: ApiErrorCode::InternalError,
+            message: "You need to provide a valid token".into(),
+        })?;
+
+    let user = LoginData {
+        username: token_data.claims.username,
+        ..Default::default()
+    };
+    let data = user.select(&state.pool).await?;
+    let new_jwt = Claims::new(&data);
+
+    let new_token = encode(&Header::default(), &new_jwt, &encoding_key).map_err(|_| ApiError {
+        message: "An internal error has occurred, please contact support".into(),
+        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+        error_code: ApiErrorCode::InternalErrorContactSupport,
+    })?;
+
+    Ok(Json(Token { token: new_token }))
 }

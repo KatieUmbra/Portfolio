@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use crate::util::error::ApiError;
 
 /// Utility struct that is used to extract a json web token from a request part
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Token {
     pub token: String,
 }

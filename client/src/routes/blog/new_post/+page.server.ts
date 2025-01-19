@@ -1,7 +1,7 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type {Actions} from "./$types";
 import type { PageServerLoad } from "../$types";
-import { backendRequest } from "$lib/backend/backend";
+import { backendRequest, preemptiveAuthCheck } from "$lib/backend/backend";
 import { BlogPostData, type BlogPost } from "$lib/backend/schema/blog";
 
 let editPost = {
@@ -9,10 +9,12 @@ let editPost = {
     id: 0
 }
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, cookies }) => {
     editPost.edit = false;
     editPost.id = 0;
     const id = url.searchParams.get("edit");
+
+    await preemptiveAuthCheck({ url, cookies });
 
     if (id != null && id != undefined) {
         const request = await backendRequest<BlogPost>(`blog/get_md?id=${id}`);
@@ -27,7 +29,7 @@ export const load: PageServerLoad = async ({ url }) => {
 };
 
 export const actions = {
-    default: async ({ request, cookies }) => {
+    default: async ({ request, cookies, url }: any) => {
         const data = await request.formData();
         const token = cookies.get("token");
 
@@ -40,7 +42,6 @@ export const actions = {
         let method = "POST";
         let requestStr = "blog/post";
         if (editPost.edit) {
-            console.log("READL EIDITING");
             method = "PUT";
             requestStr = `blog/edit?id=${editPost.id}`;
         }
@@ -51,13 +52,14 @@ export const actions = {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(formData)
-        }, token);
+        }, { token, currentPage: url.pathname });
 
         if (req.isOk) {
             if (editPost.edit) {
                 redirect(303, `/blog/post?id=${editPost.id}`);
+            } else {
+                redirect(303, `/blog`);
             }
-            return { failure: false };
         } else {
             return fail(req.error.status_code, { ...req.error, failure: true });
         }

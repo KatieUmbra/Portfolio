@@ -14,7 +14,7 @@ export async function load({ url, cookies }: any) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(veriToken)
-    }, token);
+    }, { token, currentPage: url.pathName });
 
     if (verifyRequest.isOk) {
         cookies.set("token", verifyRequest.value.token, { path: "/" });

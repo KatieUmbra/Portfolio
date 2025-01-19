@@ -7,8 +7,9 @@
 
     const rankMap: Map<number, string> = new Map();
     rankMap.set(0, "Admin");
-    rankMap.set(1, "Verified");
-    rankMap.set(2, "Unverified");
+    rankMap.set(1, "Trusted");
+    rankMap.set(2, "Verified");
+    rankMap.set(3, "Unverified");
 
     console.log(data);
 </script>

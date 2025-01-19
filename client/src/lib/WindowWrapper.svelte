@@ -9,7 +9,7 @@
     });
 </script>
 
-<div class="border95 bg95-gray max-w-7xl overflow-scroll p-1">
+<div class="border95 bg95-gray max-w-7xl overflow-scroll p-1 m-3">
     <div class="bg-gradient95 flex">
         <div class="mr-auto flex">
             <img

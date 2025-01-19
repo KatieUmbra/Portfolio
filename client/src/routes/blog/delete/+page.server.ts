@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({ cookies, url }: any) => {
     let deleteRequest = await backendRequest(`blog/delete?id=${id}`, {
         method: "DELETE",
         mode: "cors",
-    }, cookies.get("token"));
+    }, { token: cookies.get("token"), currentPage: url.pathName });
 
     if (deleteRequest.isOk) {
         throw redirect(303, "/blog");

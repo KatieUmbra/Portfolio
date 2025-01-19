@@ -58,13 +58,10 @@ impl EmailRequest {
             .bind(&self.operation)
             .fetch_one(pool)
             .await
-            .map_err(|e| {
-                tracing::error!("{:?}", e);
-                ApiError {
-                    message: "Internal Server Error (Email Requests Select)".into(),
-                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                    error_code: ApiErrorCode::None,
-                }
+            .map_err(|_| ApiError {
+                message: "Internal Server Error (Email Requests Select)".into(),
+                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                error_code: ApiErrorCode::None,
             })?;
         Ok(data)
     }
