@@ -1,3 +1,1 @@
-[Markdown editor](https://bytemd.js.org/)
-
-[Markdown parser](https://github.com/wooorm/markdown-rs)
+buttons clip at 150% zoom
