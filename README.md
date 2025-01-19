@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/KatieUmbra/Portfolio/blob/main/client/static/assets/logo%20kathy%20dev%20big.png?raw=true" alt="Repository Icon" width="200">
+<img src="https://raw.githubusercontent.com/KatieUmbra/Portfolio/refs/heads/main/client/static/assets/logo512.png?raw=true" alt="Repository Icon" width="200">
 
 # Katherine's Portfolio
 Portfolio web app complete with a blog and authentication!
