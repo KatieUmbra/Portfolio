@@ -24,10 +24,11 @@ pub struct Claims {
     pub username: String,
     /// Level of permission of the user who owns the json web token:
     /// - 0: Administrator of the website, is allowed to post and manage comments, plus the
-    /// permissions below.
-    /// - 1: Regular user, is allowed to comment and send contact forms, plus the permissions
+    /// permissions below
+    /// - 1: Befriended user, can comment and manage their own post, plus the permissions below
+    /// - 2: Regular user, is allowed to comment and send contact forms, plus the permissions
     /// below.
-    /// - 2: Unverified user, is allowed to like comments and posts.
+    /// - 3: Unverified user, is allowed to like comments and posts.
     pub rank: i32,
     /// Creation date of the json web token in utc.
     pub iat: usize,

@@ -89,13 +89,13 @@ impl Post {
         let mut file = File::create(file_path).await.map_err(|_| error.clone())?;
         file.write_all(&self.content.as_bytes())
             .await
-            .map_err(|_| error)?;
+            .map_err(|_| error.clone())?;
         Ok(())
     }
 
     pub async fn update(self, id: i32, pool: &PgPool) -> ApiResult {
         let error = ApiError {
-            message: "An internal error has occurred, please contact support".into(),
+            message: "An internal error has occurred, please contact support (UPDATE)".into(),
             status_code: StatusCode::INTERNAL_SERVER_ERROR,
             error_code: ApiErrorCode::InternalErrorContactSupport,
         };
@@ -164,7 +164,7 @@ impl Post {
         let content = match content_res {
             Ok(x) => x,
             Err(_) => {
-                Post::delete(id, &pool).await?;
+                Post::delete(id, &pool, None).await?;
                 return Err(ApiError {
                     message: "The file for the post couldn't be found.".into(),
                     status_code: StatusCode::NOT_FOUND,
@@ -192,7 +192,7 @@ impl Post {
         let content = match content_res {
             Ok(x) => x,
             Err(_) => {
-                Post::delete(id, &pool).await?;
+                Post::delete(id, &pool, None).await?;
                 return Err(ApiError {
                     message: "The file for the post couldn't be found.".into(),
                     status_code: StatusCode::NOT_FOUND,
@@ -219,19 +219,46 @@ impl Post {
         Ok(data)
     }
 
-    pub async fn delete(id: i32, pool: &PgPool) -> ApiResult {
-        let query = "DELETE FROM posts WHERE id = $1;";
-        let _ = sqlx::query(query)
-            .bind(id)
-            .execute(pool)
-            .await
-            .map_err(|_| ApiError {
-                message: "An internal error has occurred, please contact support (blog/delete)"
-                    .into(),
-                status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                error_code: ApiErrorCode::InternalErrorContactSupport,
-            })?;
+    pub async fn delete(id: i32, pool: &PgPool, constraint: Option<String>) -> ApiResult {
+        match constraint {
+            Some(usr) => {
+                let query = "DELETE FROM posts WHERE id = $1 AND creator = $2;";
+                let _ = sqlx::query(query)
+                    .bind(id)
+                    .bind(usr)
+                    .execute(pool)
+                    .await
+                    .map_err(|_| ApiError {
+                        message: "You are not the creator of this post!".into(),
+                        status_code: StatusCode::UNAUTHORIZED,
+                        error_code: ApiErrorCode::BlogUnauthorized,
+                    })?;
+            }
+            None => {
+                let query = "DELETE FROM posts WHERE id = $1;";
+                let _ = sqlx::query(query)
+                    .bind(id)
+                    .execute(pool)
+                    .await
+                    .map_err(|_| ApiError {
+                        message:
+                            "An internal error has occurred, please contact support (blog/delete)"
+                                .into(),
+                        status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                        error_code: ApiErrorCode::InternalErrorContactSupport,
+                    })?;
+            }
+        }
         let file_path = format!("posts/{}.html", id);
+        let file = File::open(file_path.clone()).await;
+        match file {
+            Err(_) => return Ok(()),
+            Ok(mut x) => {
+                let _ = x.shutdown();
+                let _ = remove_file(file_path).await;
+            }
+        }
+        let file_path = format!("posts/{}.md", id);
         let file = File::open(file_path.clone()).await;
         match file {
             Err(_) => return Ok(()),

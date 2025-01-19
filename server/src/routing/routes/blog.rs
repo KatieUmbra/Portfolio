@@ -46,7 +46,7 @@ pub async fn get_md(
     State(state): State<AppState>,
     id: Query<IdWrapper>,
 ) -> Result<Json<Post>, ApiError> {
-    tracing::info!("Get /blog/get_md {}", id.id);
+    tracing::info!("GET /blog/get_md {}", id.id);
     Ok(Json(Post::get_md(id.id, &state.pool).await?))
 }
 
@@ -109,16 +109,17 @@ pub async fn like(claims: Claims) -> ApiResult {
 pub async fn delete(
     State(state): State<AppState>,
     claims: Claims,
-    Json(id): Json<IdWrapper>,
+    id: Query<IdWrapper>,
 ) -> ApiResult {
+    tracing::info!("DELETE /blog/delete user: {}", claims.username);
     if claims.rank > 1 {
+        Post::delete(id.id, &state.pool, Some(claims.username)).await?;
         return Err(ApiError {
-            message: "You need to verify your account to do that.".into(),
+            message: "You are not allowed to do that.".into(),
             status_code: StatusCode::UNAUTHORIZED,
             error_code: ApiErrorCode::AccountUnverified,
         });
     }
-    Post::delete(id.id, &state.pool).await?;
-    tracing::info!("POST /blog/delete user: {}", claims.username);
+    Post::delete(id.id, &state.pool, None).await?;
     Ok(())
 }

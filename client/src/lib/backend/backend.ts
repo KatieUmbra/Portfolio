@@ -14,8 +14,16 @@ export class ApiError implements Error {
     }
 }
 
-export async function backendRequest<T>(route: string, details?: RequestInit): Promise<Result<T, ApiError>> {
+export async function backendRequest<T>(route: string, details?: RequestInit, token?: string): Promise<Result<T, ApiError>> {
+    if (token != null) {
+        if (details?.headers == null) {
+            (details as any).headers = {}
+        }
+        (details?.headers as any).Authorization = "Bearer " + token;
+    }
     const request = await fetch("http://localhost:8081/" + route, details);
+
+    // console.log(`Request: ${request.url}, Status: ${request.status}`)
 
     let json;
 

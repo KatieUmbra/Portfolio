@@ -53,11 +53,11 @@ pub async fn login(
 }
 
 /// `GET /info` is a test function for protected routes
-pub async fn info(claims: Claims) -> Result<String, ApiError> {
+pub async fn info(mut claims: Claims) -> Result<Json<Claims>, ApiError> {
     tracing::info!("GET /info {}", claims.username);
-    Ok(format!(
-        "Welcome to the protected area :D\nYour data:\n{claims}",
-    ))
+    claims.iat = 0;
+    claims.exp = 0;
+    Ok(Json(claims))
 }
 
 /// `PUT /verify` is a protected route that accepts an email token and updates a user's status to

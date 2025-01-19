@@ -1,7 +1,6 @@
 <script lang="ts">
     import WindowWrapper from "$lib/WindowWrapper.svelte";
     import "../app.css";
-    import { fade } from "svelte/transition";
 </script>
 
 <div class="taskbar95 flex min-w-full p-1">

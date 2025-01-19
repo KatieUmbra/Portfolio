@@ -1,8 +1,24 @@
 <script lang="ts">
     import "../../../app.css";
     import { page } from "$app/state";
+    import type { BlogPost } from "$lib/backend/schema/blog";
+    import type { Claims } from "$lib/backend/schema/user";
+    import { windowTitle } from "$lib/stores/global";
 
-    let { data } = $props();
+    let {
+        data,
+    }: {
+        data: { post: BlogPost; currentUser: Claims | null; localTime: Date };
+    } = $props();
+
+    windowTitle.set(`Post - ${data.post.title}`);
+
+    let isCreator: boolean = $state(false);
+    if (data.currentUser != null) {
+        isCreator =
+            data.post.creator == data.currentUser?.username ||
+            data.currentUser?.rank == 0;
+    }
 
     function getId(): number {
         const postId: number = parseInt(
@@ -21,10 +37,17 @@
         <a href="/blog" class="btn95 m-3"><div>Go Back</div></a>
         <a href="/blog/post?id={getId() - 1}" class="btn95 m-3 place-self-start"
             ><div>&lt; Prev</div></a>
-        <a href="/blog/new_post?edit={getId()}" class="btn95 m-3 ml-auto"
-            ><div>Edit</div></a>
-        <a href="/blog/post?id={getId() + 1}" class="btn95 m-3"
-            ><div>Next &gt;</div></a>
+        {#if isCreator}
+            <a href="/blog/delete?id={getId()}" class="btn95 m-3 ml-auto"
+                ><div>Delete</div></a>
+            <a href="/blog/new_post?edit={getId()}" class="btn95 m-3"
+                ><div>Edit</div></a>
+            <a href="/blog/post?id={getId() + 1}" class="btn95 m-3"
+                ><div>Next &gt;</div></a>
+        {:else}
+            <a href="/blog/post?id={getId() + 1}" class="btn95 m-3 ml-auto"
+                ><div>Next &gt;</div></a>
+        {/if}
     </div>
     <h1 class="txt95 m-3 text-6xl font-bold">{data.post.title}</h1>
     <p class="txt95 m-3 text-2xl">{data.post.description}</p>

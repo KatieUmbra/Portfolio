@@ -1,27 +1,8 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type {Actions} from "./$types";
 import type { PageServerLoad } from "../$types";
-import { backendRequest } from "$lib/backend";
-
-class BlogPost {
-    constructor(
-        public id: number,
-        public creator: string,
-        public content: string,
-        public description: string,
-        public title: string,
-        public creation: Date,
-        public likes: number) {
-    }
-}
-
-class FormData {
-    constructor(
-        public title: string,
-        public description: string,
-        public content: string
-    ) {}
-}
+import { backendRequest } from "$lib/backend/backend";
+import { BlogPostData, type BlogPost } from "$lib/backend/schema/blog";
 
 let editPost = {
     edit: false,
@@ -29,9 +10,11 @@ let editPost = {
 }
 
 export const load: PageServerLoad = async ({ url }) => {
+    editPost.edit = false;
+    editPost.id = 0;
     const id = url.searchParams.get("edit");
 
-    if (id !== undefined) {
+    if (id != null && id != undefined) {
         const request = await backendRequest<BlogPost>(`blog/get_md?id=${id}`);
 
         if (request.isOk) {
@@ -48,7 +31,7 @@ export const actions = {
         const data = await request.formData();
         const token = cookies.get("token");
 
-        const formData = new FormData(
+        const formData = new BlogPostData(
             data.get("title") as string,
             data.get("description") as string,
             data.get("content") as string
@@ -57,6 +40,7 @@ export const actions = {
         let method = "POST";
         let requestStr = "blog/post";
         if (editPost.edit) {
+            console.log("READL EIDITING");
             method = "PUT";
             requestStr = `blog/edit?id=${editPost.id}`;
         }
@@ -65,10 +49,9 @@ export const actions = {
             method: method,
             mode: "cors", headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
             },
             body: JSON.stringify(formData)
-        });
+        }, token);
 
         if (req.isOk) {
             if (editPost.edit) {

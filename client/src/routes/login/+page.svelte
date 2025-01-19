@@ -1,5 +1,8 @@
 <script lang="ts">
     import type { ActionData } from "./$types";
+    import { windowTitle } from "$lib/stores/global";
+
+    windowTitle.set("Login");
 
     let { form }: { form: ActionData } = $props();
 </script>

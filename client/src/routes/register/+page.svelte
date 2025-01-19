@@ -2,6 +2,10 @@
     import "../../app.css";
     import type { ActionData } from "./$types";
 
+    import { windowTitle } from "$lib/stores/global";
+
+    windowTitle.set("Register");
+
     let { form }: { form: ActionData } = $props();
 </script>
 

@@ -1,9 +1,12 @@
 <script lang="ts">
-    import type { PageData } from "./$types";
     import "../../app.css";
+    import type { BlogPost } from "$lib/backend/schema/blog";
+    import { windowTitle } from "$lib/stores/global";
 
-    let { data }: { data: PageData } = $props();
-    let posts = data.posts;
+    windowTitle.set("Kathy's Blog");
+
+    const { data }: { data: { posts: BlogPost[] } } = $props();
+    const posts = data.posts;
 </script>
 
 <div class="bg-gray-ccc border95-inv">
@@ -20,7 +23,7 @@
                     <p class="txt95 m-1">by: <b>{element.creator}</b></p>
                     <p class="txt95 m-1">Likes: {element.likes}</p>
                     <p class="txt95 m-1">
-                        Created: {element.localTime.toLocaleDateString(
+                        Created: {(element.creation as Date).toLocaleDateString(
                             undefined,
                             {
                                 weekday: "long",

@@ -1,9 +1,11 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types"
+import { backendRequest } from "$lib/backend/backend";
+import type { BlogPost } from "$lib/backend/schema/blog";
 
 
 export const load: PageServerLoad = async (_) => {
-    const req = await fetch("http://localhost:8081/blog/get_latest?amount=10", {
+    const request = await backendRequest<{ vec: BlogPost[] }>("blog/get_latest?amount=10", {
         method: "GET",
         mode: "cors",
         headers: {
@@ -11,25 +13,15 @@ export const load: PageServerLoad = async (_) => {
         }
     });
 
-    let json;
-    
-    try {
-        json = await req.json();
-        if (!req.ok) {
-            error(500, {message: "There has been an error"});
-        }
-    } catch (e) {
-        if (!req.ok) {
-            error(500, {message: "There has been an error"});
-        }
+    if (request.isOk) {
+        let posts = request.value.vec;
+        posts.forEach((element: BlogPost) => {
+            const parsedDate = new Date(element.creation);
+            const localTime = new Date(parsedDate.getTime() - parsedDate.getTimezoneOffset()*60*1000);
+            element.creation = localTime;
+        });
+        return { posts };
+    } else {
+        error(request.error.status_code, request.error);
     }
-
-
-    json.vec.forEach((element: any) => {
-        const parsedDate = new Date(element.creation);
-        const localTime = new Date(parsedDate.getTime() - parsedDate.getTimezoneOffset()*60*1000);
-        element.localTime = localTime;
-    });
-
-    return { posts: json.vec };
 }

@@ -5,13 +5,20 @@
     import type { Plugin } from "svelte-exmarkdown";
     import rehypeShikiFromHighlighter from "@shikijs/rehype/core";
     import { createHighlighterCore } from "shiki";
-    import type { ActionData, PageData } from "../$types";
+    import { BlogPostData, BlogPost } from "$lib/backend/schema/blog";
+    import { windowTitle } from "$lib/stores/global";
+
+    windowTitle.set("New post");
 
     let title: string = $state("");
     let description: string = $state("");
     let md: string = $state("");
 
-    let { form, data }: { form: ActionData; data: PageData } = $props();
+    let {
+        form,
+        data,
+    }: { form: BlogPostData; data: { status: number; post: BlogPost } } =
+        $props();
 
     const plugins = [gfmPlugin(), { renderer: { h1: "b", h2: "b", h3: "b" } }];
 

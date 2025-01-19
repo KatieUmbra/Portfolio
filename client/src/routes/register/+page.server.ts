@@ -1,39 +1,33 @@
+import { backendRequest } from "$lib/backend/backend";
+import { UserData } from "$lib/backend/schema/user";
 import { fail } from "@sveltejs/kit";
 
 export const actions = {
-    default: async ({ request }) => {
+    default: async ({ request }: any) => {
         const data = await request.formData();
 
-        const formData = {
-            username: data.get("username"),
-            display_name: data.get("displayName"),
-            email: data.get("email"),
-            password: data.get("password"),
-            verify: data.get("verifyPassword")
-        };
+        const userData = new UserData (
+            data.get("username")as string,
+            data.get("displayName") as string,
+            data.get("email") as string,
+            data.get("password"),
+        );
 
-        if (formData.password != formData.verify) {
+        if (userData.password != data.get("verifyPassword") as string) {
             return fail(500, {message: "Passwords do not match!", failure: true})
         }
 
-        const req = await fetch("http://localhost:8081/register", {
+        const registerRequest = await backendRequest("register", {
             method: "POST",
             mode: "cors",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(formData),
-        });
+            body: JSON.stringify(userData),
+        })
 
-        try {
-            let json = await req.json();
-            if (!req.ok) {
-                return fail(req.status, { ...json, failure: true });
-            }
-        } catch (e) {
-            if (!req.ok) {
-                return fail(req.status, { failure: true });
-            }
+        if (registerRequest.isErr) {
+            return fail(registerRequest.error.status_code, { ...registerRequest.error, failure: true });
         }
 
         return { failure: false };

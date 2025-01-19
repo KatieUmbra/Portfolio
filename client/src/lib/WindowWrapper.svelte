@@ -1,6 +1,12 @@
 <script lang="ts">
     import "../app.css";
     let { children } = $props();
+    import { windowTitle } from "./stores/global";
+
+    let title = $state("");
+    windowTitle.subscribe((it) => {
+        title = it;
+    });
 </script>
 
 <div class="border95 bg95-gray max-w-7xl overflow-scroll p-1">
@@ -10,7 +16,7 @@
                 alt="logo of the website, it's a windows 95 styled cat coming out of a folder"
                 class="img95 m-1"
                 src="/assets/logo kathy dev2.png" />
-            <p class=" mr-3 mt-0.5 text-white">home page</p>
+            <p class=" mr-3 mt-0.5 text-white">{title}</p>
         </div>
         <div class="ml-auto flex">
             <div class="btn95-gray grid place-content-center">_</div>

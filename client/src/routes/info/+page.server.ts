@@ -1,14 +1,13 @@
-export async function load({ cookies }) {
-    const token = cookies.get("token");
+import { backendRequest } from "$lib/backend/backend";
+import type { Claims } from "$lib/backend/schema/user";
 
-    const request = await fetch("http://localhost:8081/info", {
+export async function load({ cookies }: any) {
+    const request = await backendRequest<Claims>("info", {
         method: "GET",
-        headers: {
-            Authorization: "Bearer " + token,
-        },
-    });
+    }, cookies.get("token"));
 
-    const info = await request.text();
-
-    return { info };
+    if (request.isOk) {
+        const info = request.value;
+        return { info };
+    }
 }

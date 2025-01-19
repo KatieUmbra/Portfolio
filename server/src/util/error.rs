@@ -7,7 +7,7 @@ use serde::Serialize;
 use serde_json::json;
 
 /// Enum containing serializable versions of internal error codes
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug)]
 pub enum ApiErrorCode {
     None = 0,
     RegisterEmailExists = 1,
@@ -26,7 +26,7 @@ pub enum ApiErrorCode {
 }
 
 /// Struct used for api errors
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ApiError {
     /// An ideally short and simple message that describes the error
     pub message: String,

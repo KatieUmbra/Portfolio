@@ -1,29 +1,26 @@
-import {fail} from "@sveltejs/kit";
+import { backendRequest } from "$lib/backend/backend";
+import {fail, redirect} from "@sveltejs/kit";
 
-export async function load({ url, cookies }) {
-    const auth_token = cookies.get("token");
-    const verification_token = {
+export async function load({ url, cookies }: any) {
+    const token = cookies.get("token");
+    const veriToken = {
         veri_token: url.searchParams.get("token"),
     };
 
-    const request = await fetch("http://localhost:8081/verify", {
+    const verifyRequest = await backendRequest<{ token: string }>("verify", {
         method: "PUT",
         mode: "cors",
         headers: {
-            Authorization: "Bearer " + auth_token,
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(verification_token),
-    })
+        body: JSON.stringify(veriToken)
+    }, token);
 
-    let json = await request.json();
-    if (!request.ok) {
-        return fail(request.status, { ...json, failure: true });
+    if (verifyRequest.isOk) {
+        cookies.set("token", verifyRequest.value.token, { path: "/" });
+    } else {
+        return fail(verifyRequest.error.status_code, { ...verifyRequest.error, failure: true });
     }
-    const jwt = await json;
 
-    cookies.set("token", jwt.token, { path: "/" });
-    const info = "Your account has been verified!";
-
-    return { info };
+    return redirect(303, "/");
 }
