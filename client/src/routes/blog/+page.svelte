@@ -10,7 +10,13 @@
 </script>
 
 <div class="bg-gray-ccc border95-inv">
-    <h1 class="m-3 text-5xl">Blog Posts</h1>
+    <div class="flex">
+        <h1 class="m-3 text-5xl mr-auto">Blog Posts</h1>
+        <a class="m-5 btn95 ml-auto" href="/blog/new_post"><div>New post</div></a>
+    </div>
+    {#if posts.length == 0}
+    <p class="m-3 text-xl">There are no posts yet! :(</p>
+    {/if}
     {#each posts as element}
         <div class="border95-inv m-1">
             <div class="grid p-2">

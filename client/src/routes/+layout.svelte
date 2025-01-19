@@ -11,14 +11,15 @@
             src="/assets/logo kathy dev2.png" />
         <p class="font-bold">Start</p>
     </a>
+    <a class="tb-btn95 w-32" href="/portfolio"><div>Portfolio</div></a>
+    <a class="tb-btn95 w-32" href="/blog"><div>Blog</div></a>
+    <a class="tb-btn95 w-32" href="/contact"><div>Contact</div></a>
+    <a class="tb-btn95 w-32" href="/faq"><div>Faq</div></a>
+    <div class="ml-4 mr-4"></div>
     <a class="tb-btn95 w-32" href="/login"><div>Login</div></a>
     <a class="tb-btn95 w-32" href="/register"><div>Register</div></a>
-    <a class="tb-btn95 w-32" href="/info"><div>Info</div></a>
-    <a class="tb-btn95 w-32" href="/blog/new_post"><div>Make Post</div></a>
-    <a class="tb-btn95 w-32" href="/blog"><div>Blog</div></a>
 </div>
 <div
-    transition:fade
     class="max-h-95 bg-95 min-h-95 grid w-full items-center justify-center overflow-scroll">
     <WindowWrapper>
         <slot />

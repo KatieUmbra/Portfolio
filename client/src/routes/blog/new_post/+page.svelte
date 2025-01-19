@@ -61,7 +61,11 @@
 </script>
 
 <svelte:head>
-    <title>New post {title}</title>
+    {#if title == ""}
+        <title>New post</title>
+    {:else}
+        <title>{title}</title>
+    {/if}
 </svelte:head>
 
 <form class="bg-gray-ccc w-max" method="POST">

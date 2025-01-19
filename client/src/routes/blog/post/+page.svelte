@@ -13,12 +13,13 @@
 
     windowTitle.set(`Post - ${data.post.title}`);
 
-    let isCreator: boolean = $state(false);
+    let isCreator: boolean = $derived.by(() => {
     if (data.currentUser != null) {
-        isCreator =
-            data.post.creator == data.currentUser?.username ||
-            data.currentUser?.rank == 0;
+        return data.post.creator == data.currentUser?.username
+            || data.currentUser?.rank == 0
     }
+    return false;
+    });
 
     function getId(): number {
         const postId: number = parseInt(
