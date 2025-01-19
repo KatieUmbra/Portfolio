@@ -47,9 +47,7 @@ export async function backendRequest<T>(route: string, details?: RequestInit, au
         }
     } catch (_) {
         if (!request.ok) {
-            console.log(`is ok?: ${request.ok}`);
             if (auth != null && request.status == 409) {
-                console.log(`Auth: ${auth == null}, Request: ${request.status}`);
                 // HANDLE JWT EXPIRED
                 const jwtRequest = await backendRequest<{ token: string }>("refreshJwt", {
                     method: "POST",

@@ -6,7 +6,6 @@ export async function load({ url, cookies }: any) {
     let oldToken = cookies.get("token");
     if (oldToken != null) {
         if (oldToken != token) {
-            console.log(`bounce: ${bounce}`);
             cookies.set("token", token, { path: "/", maxAge: 86400 });
         }
     }
