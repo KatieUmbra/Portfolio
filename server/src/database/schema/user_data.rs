@@ -1,4 +1,3 @@
-use axum::http::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 

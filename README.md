@@ -62,6 +62,9 @@ In this website you can make an account to contact me, verify it with you email 
   - [ ] Username Changing
   - [ ] Display username changing
 - [ ] Portfolio
+- [ ] Internal
+  - [ ] Document backend
+  - [ ] Document frontend
 
 ## Contributing
 
