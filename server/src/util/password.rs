@@ -7,7 +7,7 @@ use axum::http::StatusCode;
 use zeroize::Zeroize;
 use zxcvbn::zxcvbn;
 
-use super::error::{ApiError, ApiErrorCode};
+use super::error::{generic_error, ApiError, ApiErrorCode};
 
 /// Hashes the string utilizing the argon algorithm
 /// ## Notes
@@ -18,11 +18,7 @@ pub fn hash_str(str: &mut String) -> Result<String, ApiError> {
 
     let hashed = argon2
         .hash_password(&str.as_bytes(), &salt)
-        .map_err(|_| ApiError {
-            message: "An internal error has ocurred, please contact support".into(),
-            error_code: ApiErrorCode::InternalErrorContactSupport,
-            status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        })?;
+        .map_err(|_| generic_error(ApiErrorCode::InternalPwdhshError))?;
 
     str.zeroize();
     Ok(hashed.to_string())
@@ -33,11 +29,8 @@ pub fn hash_str(str: &mut String) -> Result<String, ApiError> {
 /// the input [&mut LoginData] will have it's [LoginData::password] turned into zeroes.
 pub fn verify_str(hashed: &String, user: &mut LoginData) -> Result<(), ApiError> {
     let argon2 = Argon2::default();
-    let parsed_hash = PasswordHash::new(&hashed).map_err(|_| ApiError {
-        message: "An internal error has occurred, please contact support".into(),
-        error_code: ApiErrorCode::InternalErrorContactSupport,
-        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-    })?;
+    let parsed_hash =
+        PasswordHash::new(&hashed).map_err(|_| generic_error(ApiErrorCode::InternalPwdhshError))?;
     let _ = argon2
         .verify_password(&user.password.as_bytes(), &parsed_hash)
         .map_err(|_| ApiError {
@@ -65,6 +58,5 @@ pub fn verify_password_requirements(password: &String) -> Result<(), ApiError> {
             error_code: ApiErrorCode::RegisterInsecurePassword,
         });
     }
-    println!("password score: {}", estimate.score());
     Ok(())
 }

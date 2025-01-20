@@ -4,7 +4,7 @@ use sqlx::PgPool;
 
 use crate::{
     database::util::user_db_map_error,
-    util::error::{ApiError, ApiErrorCode},
+    util::error::{generic_error, ApiError, ApiErrorCode},
 };
 
 /// Struct for the Postgres database table that contains email requests
@@ -58,11 +58,7 @@ impl EmailRequest {
             .bind(&self.operation)
             .fetch_one(pool)
             .await
-            .map_err(|_| ApiError {
-                message: "Internal Server Error (Email Requests Select)".into(),
-                status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                error_code: ApiErrorCode::None,
-            })?;
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
         Ok(data)
     }
 

@@ -7,7 +7,7 @@ use axum::{
 use crate::{
     database::schema::blog_data::{I32Wrapper, IdWrapper, Post, PostData, VecWrapper},
     util::{
-        error::{ApiError, ApiErrorCode},
+        error::{generic_error, ApiError, ApiErrorCode},
         jwt::Claims,
         state::AppState,
     },
@@ -81,11 +81,7 @@ pub async fn get_latest(
 
 pub async fn comment(claims: Claims) -> ApiResult {
     if claims.rank > 2 {
-        return Err(ApiError {
-            message: "You need to verify your account to do that.".into(),
-            status_code: StatusCode::UNAUTHORIZED,
-            error_code: ApiErrorCode::AccountUnverified,
-        });
+        return Err(generic_error(ApiErrorCode::AccountUnverified));
     }
     tracing::info!("POST /blog/comment user: {}, post:", claims.username);
     Ok(())
@@ -93,11 +89,7 @@ pub async fn comment(claims: Claims) -> ApiResult {
 
 pub async fn like(claims: Claims) -> ApiResult {
     if claims.rank > 2 {
-        return Err(ApiError {
-            message: "You need to verify your account to do that.".into(),
-            status_code: StatusCode::UNAUTHORIZED,
-            error_code: ApiErrorCode::AccountUnverified,
-        });
+        return Err(generic_error(ApiErrorCode::AccountUnverified));
     }
     tracing::info!(
         "POST /blog/like user: {}, post: , parent: ",
@@ -117,7 +109,7 @@ pub async fn delete(
         return Err(ApiError {
             message: "You are not allowed to do that.".into(),
             status_code: StatusCode::UNAUTHORIZED,
-            error_code: ApiErrorCode::AccountUnverified,
+            error_code: ApiErrorCode::BlogUnauthorized,
         });
     }
     Post::delete(id.id, &state.pool, None).await?;

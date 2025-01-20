@@ -4,7 +4,7 @@ use sqlx::PgPool;
 
 use crate::{
     database::util::user_db_map_error,
-    util::error::{ApiError, ApiErrorCode},
+    util::error::{generic_error, ApiError, ApiErrorCode},
 };
 
 /// Contains user data
@@ -45,31 +45,19 @@ impl UserData {
             .bind(&username)
             .fetch_one(pool)
             .await
-            .map_err(|e| {
-                tracing::error!("{:?}", e);
-
-                ApiError {
-                    message: "Internal error idk".into(),
-                    status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                    error_code: ApiErrorCode::None,
-                }
-            })?;
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
 
         Ok(data)
     }
 
-    /// Changes the database field `verified` from `2` to `1`
+    /// Changes the database field `verified` from `3` to `2`
     pub async fn verify(&self, pool: &PgPool) -> Result<(), ApiError> {
         let query = "UPDATE users SET verified=2 WHERE username=$1";
         let _ = sqlx::query(query)
             .bind(&self.username)
             .execute(pool)
             .await
-            .map_err(|_| ApiError {
-                message: "Internal error".into(),
-                status_code: StatusCode::INTERNAL_SERVER_ERROR,
-                error_code: ApiErrorCode::InternalErrorContactSupport,
-            })?;
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
 
         Ok(())
     }

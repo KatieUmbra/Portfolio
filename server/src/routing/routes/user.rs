@@ -2,7 +2,7 @@ use crate::{
     database::schema::{email_request::EmailRequest, login_data::LoginData, user_data::UserData},
     routing::routes::structs::EmailToken,
     util::{
-        error::{ApiError, ApiErrorCode},
+        error::{generic_error, ApiError, ApiErrorCode},
         jwt::Claims,
         password::{hash_str, verify_password_requirements, verify_str},
         state::AppState,
@@ -38,11 +38,8 @@ pub async fn login(
     verify_str(&data.password, &mut user)?;
     let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
     let claims = Claims::new(&data);
-    let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
-        message: "An internal error has occurred, please contact support".into(),
-        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        error_code: ApiErrorCode::InternalErrorContactSupport,
-    })?;
+    let token = encode(&Header::default(), &claims, &encoding_key)
+        .map_err(|_| generic_error(ApiErrorCode::InternalJwtError))?;
     tracing::info!("POST /login {}", user.username);
 
     if claims.rank == 2 {
@@ -141,11 +138,8 @@ pub async fn update_jwt(
     let data = user.select(&state.pool).await?;
     let encoding_key = EncodingKey::from_secret(&state.settings.jwt_secret.as_bytes());
     let claims = Claims::new(&data);
-    let token = encode(&Header::default(), &claims, &encoding_key).map_err(|_| ApiError {
-        message: "An internal error has occurred, please contact support".into(),
-        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        error_code: ApiErrorCode::InternalErrorContactSupport,
-    })?;
+    let token = encode(&Header::default(), &claims, &encoding_key)
+        .map_err(|_| generic_error(ApiErrorCode::InternalJwtError))?;
     tracing::info!("POST /update_jwt {}", user.username);
     Ok(axum::Json(Token { token }))
 }
@@ -163,7 +157,7 @@ pub async fn refresh_jwt(
     let token_data = decode::<Claims>(&*token.token, &decoding_key, &Validation::default())
         .map_err(|_| ApiError {
             status_code: StatusCode::UNAUTHORIZED,
-            error_code: ApiErrorCode::InternalError,
+            error_code: ApiErrorCode::InternalJwtError,
             message: "You need to provide a valid token".into(),
         })?;
 
@@ -174,11 +168,8 @@ pub async fn refresh_jwt(
     let data = user.select(&state.pool).await?;
     let new_jwt = Claims::new(&data);
 
-    let new_token = encode(&Header::default(), &new_jwt, &encoding_key).map_err(|_| ApiError {
-        message: "An internal error has occurred, please contact support".into(),
-        status_code: StatusCode::INTERNAL_SERVER_ERROR,
-        error_code: ApiErrorCode::InternalErrorContactSupport,
-    })?;
+    let new_token = encode(&Header::default(), &new_jwt, &encoding_key)
+        .map_err(|_| generic_error(ApiErrorCode::InternalJwtError))?;
 
     Ok(Json(Token { token: new_token }))
 }
