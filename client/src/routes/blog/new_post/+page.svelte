@@ -1,5 +1,4 @@
 <script lang="ts">
-    import "../../../app.css";
     import Markdown from "svelte-exmarkdown";
     import { gfmPlugin } from "svelte-exmarkdown/gfm";
     import type { Plugin } from "svelte-exmarkdown";

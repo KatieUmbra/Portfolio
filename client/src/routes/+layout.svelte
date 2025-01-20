@@ -1,23 +1,30 @@
 <script lang="ts">
     import WindowWrapper from "$lib/WindowWrapper.svelte";
     import "../app.css";
+    import "$lib/styles/layout.css";
+    import "$lib/styles/95components.css";
+    import "$lib/styles/tailwind.css";
+    import "$lib/styles/global.css";
 </script>
 
 <div class="taskbar95 flex min-w-full p-1">
-    <a href="/" class="tb-btn95 flex w-16 items-center justify-items-center">
-        <img
-            alt="website icon"
-            class="mr-0.5"
-            src="/assets/logo kathy dev2.png" />
+    <a href="/" class="tb-start95">
+        <img alt="website icon" class="mr-0.5" src="/assets/logo.png" />
         <p class="font-bold">Start</p>
     </a>
-    <a class="tb-btn95 w-32" href="/portfolio"><div>Portfolio</div></a>
-    <a class="tb-btn95 w-32" href="/blog"><div>Blog</div></a>
-    <a class="tb-btn95 w-32" href="/contact"><div>Contact</div></a>
-    <a class="tb-btn95 w-32" href="/faq"><div>Faq</div></a>
+    <a class="tb-btn95" href="/portfolio"
+        ><img alt="portfolio icon" class="mr-0.5" src="/assets/portfolio.png" />
+        <p>Portfolio</p></a>
+    <a class="tb-btn95" href="/blog"
+        ><img alt="blog icon" class="mr-0.5" src="/assets/blog.png" />
+        <p>Blog</p></a>
+    <a class="tb-btn95" href="/contact"
+        ><img alt="contact icon" class="mr-0.5" src="/assets/contact.png" />
+        <p>Contact</p></a>
+    <a class="tb-btn95" href="/faq"
+        ><img alt="f.a.q. icon" class="mr-0.5" src="/assets/faq.png" />
+        <p>Faq</p></a>
     <div class="ml-4 mr-4"></div>
-    <a class="tb-btn95 w-32" href="/login"><div>Login</div></a>
-    <a class="tb-btn95 w-32" href="/register"><div>Register</div></a>
 </div>
 <div
     class="max-h-95 bg-95 min-h-95 grid w-full items-center justify-center overflow-scroll">

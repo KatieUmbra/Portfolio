@@ -1,0 +1,104 @@
+.btn95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-right-color: black;
+    border-bottom-color: black;
+    background: transparent;
+    border-radius: 1px;
+}
+
+.btn95:hover {
+    border: 2px inset #DDD !important;
+    background: #ffffffAA;
+}
+
+.btn95:focus {
+    border: 2px inset #DDD !important;
+    background: #ffffffAA;
+    outline: 0 !important;
+}
+
+.btn95-gray {
+    margin-top: 0.25rem;
+    margin-right: 0.25rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-bottom-color: black;
+    border-right-color: black;
+    background-color: #ccc;
+    user-select: none;
+}
+
+.txt-in95 {
+    border-width: 2px;
+    padding: 0.25rem;
+    border-style: inset;
+    border-color: black;
+    background: white;
+    border-radius: 1px;
+    padding: 4px;
+    max-width: 100%;
+}
+
+.txt95 {
+    border-width: 2px;
+    padding: 0.25rem;
+    border-style: inset;
+    border-color: black;
+    background: white;
+    border-radius: 2px;
+}
+
+.img95 {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.border95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-bottom-color: black;
+    border-right-color: black;
+}
+
+.border95-inv {
+    border-width: 2px;
+    border-style: inset;
+    border-color: black;
+    border-bottom-color: white;
+    border-right-color: white;
+}
+
+.window95 {
+    border-width: 2px;
+    border-style: outset;
+    border-color: #ffd8e7;
+    border-right-color: #D2B0B0;
+    border-bottom-color: #D2B0B0;
+    background: transparent;
+    border-radius: 1px;
+    > div {
+        border-width: 2px;
+        border-style: outset;
+        border-color: #FBC8E2;
+        border-right-color: #744855;
+        border-bottom-color: #744855;
+        background: transparent;
+        color: black;
+        padding: 0.25rem;
+    }
+}
+
+.bg-gradient95 {
+    background: rgb(117,0,124);
+    background: linear-gradient(90deg, rgba(117,0,124,1) 0%, rgba(245,124,235,1) 100%);
+}
+
+.bg95-gray {
+    background-color: #ccc;
+}

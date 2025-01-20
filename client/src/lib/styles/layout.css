@@ -1,0 +1,190 @@
+@keyframes scrolling {
+    from {
+        background-position: 0 0;
+    }
+    to {
+        background-position: 100px 100px;
+    }
+}
+
+.bg-95 {
+    background-color: #FECAD5;
+    background-image: url("/assets/background.gif");
+    background-size: 100px;
+    animation: scrolling 2s linear infinite;
+}
+.taskbar95 {
+    min-height: 5lvh;
+    max-height: 5lvh;
+    background: #ccc;
+    border-width: 2px;
+    border-style: outset;
+    border-color: transparent;
+    border-top-color: white;
+    border-bottom-color: black;
+}
+
+.tb-btn95 {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-width: 2px;
+    font-size: 13pt;
+    border-style: outset;
+    border-color: white;
+    border-right-color: black;
+    border-bottom-color: black;
+    background: transparent;
+    border-radius: 1px;
+    margin-left: 2px;
+    padding-left: 4px;
+    align-items: center;
+    justify-items: center;
+    > img {
+        width: 1lvw;
+    }
+}
+
+.tb-start95 {
+    min-height: 2lvh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    border-width: 2px;
+    border-style: outset;
+    border-color: white;
+    border-right-color: black;
+    border-bottom-color: black;
+    background: transparent;
+    border-radius: 1px;
+    margin-left: 2px;
+    padding-left: 4px;
+    align-items: center;
+    justify-items: center;
+    > img {
+        width: 1lvw;
+    }
+}
+
+.tb-btn95:hover, .tb-start95:hover {
+    border-color: black;
+    border-style: inset;
+    border-right-color: white;
+    border-bottom-color: white;
+    background: #ffffffAA;
+}
+
+.tb-btn95:focus, .tb-start95:hover {
+    border: 2px inset #DDD #CCC !important;
+    background: #ffffffAA;
+    outline: 0 !important;
+}
+
+/* Custom, iPhone Retina */ 
+@media only screen and (min-width : 0px) {
+    .tb-btn95 {
+        min-width: 20lvw;
+        max-width: 20lvw;
+        > img {
+            width: 4lvw;
+        }
+    }
+    .tb-start95 {
+        min-width: 14lvw;
+        max-width: 14lvw;
+        > img {
+            width: 4lvw;
+        }
+    }
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+    .taskbar95 {
+        min-height: 10lvh;
+        max-height: 10lvh;
+    }
+    .tb-btn95 {
+        min-width: 15lvw;
+        max-width: 15lvw;
+        > img {
+            width: 2lvw;
+        }
+    }
+    .tb-start95 {
+        min-width: 10lvw;
+        max-width: 10lvw;
+        > img {
+            width: 2lvw;
+        }
+    }
+    .max-h-95 {
+        max-height: 90lvh;
+    }
+
+    .min-h-95 {
+        min-height: 90lvh;
+    }
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+    .taskbar95 {
+        min-height: 5lvh;
+        max-height: 5lvh;
+    }
+    .tb-btn95 {
+        min-width: 10lvw;
+        max-width: 10lvw;
+        font-size: 15pt;
+        > img {
+            width: 1.5lvw;
+        }
+    }
+    .tb-start95 {
+        min-width: 5lvw;
+        max-width: 5lvw;
+        font-size: 15pt;
+        > img {
+            width: 1.5lvw;
+        }
+    }
+    .max-h-95 {
+        max-height: 95lvh;
+    }
+
+    .min-h-95 {
+        min-height: 95lvh;
+    }
+}
+
+/* Large Devices, Big monitors, 4K TV */
+@media only screen and (min-width : 1281px) {
+    .taskbar95 {
+        min-height: 5lvh;
+        max-height: 5lvh;
+    }
+    .tb-btn95 {
+        min-width: 10lvw;
+        max-width: 10lvw;
+        font-size: 15pt;
+        > img {
+            width: 1.5lvw;
+        }
+    }
+    .tb-start95 {
+        min-width: 5lvw;
+        max-width: 5lvw;
+        font-size: 15pt;
+        > img {
+            width: 1.5lvw;
+        }
+    }
+    .max-h-95 {
+        max-height: 95lvh;
+    }
+
+    .min-h-95 {
+        min-height: 95lvh;
+    }
+}

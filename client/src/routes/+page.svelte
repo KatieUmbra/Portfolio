@@ -1,6 +1,4 @@
 <script lang="typescript">
-    import "../app.css";
-
     import { windowTitle } from "$lib/stores/global";
 
     windowTitle.set("Home Page");

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import "../../../app.css";
     import { page } from "$app/state";
     import type { BlogPost } from "$lib/backend/schema/blog";
     import type { Claims } from "$lib/backend/schema/user";
@@ -14,11 +13,13 @@
     windowTitle.set(`Post - ${data.post.title}`);
 
     let isCreator: boolean = $derived.by(() => {
-    if (data.currentUser != null) {
-        return data.post.creator == data.currentUser?.username
-            || data.currentUser?.rank == 0
-    }
-    return false;
+        if (data.currentUser != null) {
+            return (
+                data.post.creator == data.currentUser?.username ||
+                data.currentUser?.rank == 0
+            );
+        }
+        return false;
     });
 
     function getId(): number {

@@ -1,7 +1,8 @@
 <script lang="ts">
-    import "../app.css";
-    let { children } = $props();
+    let { children }: { children?: any } = $props();
     import { windowTitle } from "./stores/global";
+
+    console.log(typeof children);
 
     let title = $state("");
     windowTitle.subscribe((it) => {
@@ -9,13 +10,13 @@
     });
 </script>
 
-<div class="border95 bg95-gray max-w-7xl overflow-scroll p-1 m-3">
+<div class="border95 bg95-gray m-3 max-w-7xl overflow-scroll p-1">
     <div class="bg-gradient95 flex">
         <div class="mr-auto flex">
             <img
                 alt="logo of the website, it's a windows 95 styled cat coming out of a folder"
                 class="img95 m-1"
-                src="/assets/logo kathy dev2.png" />
+                src="/assets/logo512.png" />
             <p class=" mr-3 mt-0.5 text-white">{title}</p>
         </div>
         <div class="ml-auto flex">

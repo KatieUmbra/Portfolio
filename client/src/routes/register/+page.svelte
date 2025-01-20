@@ -1,5 +1,4 @@
 <script lang="ts">
-    import "../../app.css";
     import type { ActionData } from "./$types";
 
     import { windowTitle } from "$lib/stores/global";
