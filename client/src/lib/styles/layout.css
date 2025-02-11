@@ -29,7 +29,6 @@
     align-items: center;
     overflow: hidden;
     border-width: 2px;
-    font-size: 13pt;
     border-style: outset;
     border-color: white;
     border-right-color: black;
@@ -81,7 +80,7 @@
 }
 
 /* Custom, iPhone Retina */ 
-@media only screen and (min-width : 0px) {
+@media only screen and (min-width : 0rem) {
     .tb-btn95 {
         min-width: 20lvw;
         max-width: 20lvw;
@@ -99,7 +98,7 @@
 }
 
 /* Small Devices, Tablets */
-@media only screen and (min-width : 768px) {
+@media only screen and (min-width : 48rem) {
     .taskbar95 {
         min-height: 10lvh;
         max-height: 10lvh;
@@ -128,7 +127,7 @@
 }
 
 /* Medium Devices, Desktops */
-@media only screen and (min-width : 992px) {
+@media only screen and (min-width : 62rem) {
     .taskbar95 {
         min-height: 5lvh;
         max-height: 5lvh;
@@ -159,7 +158,7 @@
 }
 
 /* Large Devices, Big monitors, 4K TV */
-@media only screen and (min-width : 1281px) {
+@media only screen and (min-width : 80.1rem) {
     .taskbar95 {
         min-height: 5lvh;
         max-height: 5lvh;

@@ -1,11 +1,9 @@
 <script lang="ts">
     import Markdown from "svelte-exmarkdown";
     import { gfmPlugin } from "svelte-exmarkdown/gfm";
-    import type { Plugin } from "svelte-exmarkdown";
-    import rehypeShikiFromHighlighter from "@shikijs/rehype/core";
-    import { createHighlighterCore } from "shiki";
-    import { BlogPostData, BlogPost } from "$lib/backend/schema/blog";
-    import { windowTitle } from "$lib/stores/global";
+    import { BlogPost } from "$lib/backend/schema/blog";
+    import { windowTitle, shikiPromise } from "$lib/stores/global";
+    import { get } from "svelte/store";
 
     windowTitle.set("New post");
 
@@ -16,41 +14,14 @@
     let {
         form,
         data,
-    }: { form: BlogPostData; data: { status: number; post: BlogPost } } =
-        $props();
+    }: {
+        form: any;
+        data: { status: number; post: BlogPost };
+    } = $props();
 
     const plugins = [gfmPlugin(), { renderer: { h1: "b", h2: "b", h3: "b" } }];
 
-    const shikiPluginPromise = createHighlighterCore({
-        themes: [import("shiki/themes/light-plus.mjs")],
-        langs: [
-            import("shiki/langs/rust.mjs"),
-            import("shiki/langs/cpp.mjs"),
-            import("shiki/langs/cmake.mjs"),
-            import("shiki/langs/javascript.mjs"),
-            import("shiki/langs/sql.mjs"),
-            import("shiki/langs/typescript.mjs"),
-            import("shiki/langs/kotlin.mjs"),
-            import("shiki/langs/c.mjs"),
-            import("shiki/langs/css.mjs"),
-            import("shiki/langs/html.mjs"),
-            import("shiki/langs/csharp.mjs"),
-            import("shiki/langs/xml.mjs"),
-            import("shiki/langs/toml.mjs"),
-            import("shiki/langs/jsonl.mjs"),
-            import("shiki/langs/yaml.mjs"),
-            import("shiki/langs/python.mjs"),
-        ],
-        loadWasm: import("shiki/wasm"),
-    }).then((highlighter): Plugin => {
-        return {
-            rehypePlugin: [
-                rehypeShikiFromHighlighter,
-                highlighter,
-                { theme: "light-plus" },
-            ],
-        };
-    });
+    const shikiPluginPromise = get(shikiPromise);
 
     if (data.status == 200) {
         title = data.post.title;
@@ -98,9 +69,7 @@
                 {/await}
             </div>
         </div>
-        <button type="submit" class="btn95 m-3 max-w-min">
-            <div>Submit</div>
-        </button>
+        <button type="submit" class="btn95 m-3 max-w-min"> Submit </button>
         {#if form?.failure}
             <p class="m-3">{form?.message}</p>
         {/if}

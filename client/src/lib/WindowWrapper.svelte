@@ -2,15 +2,13 @@
     let { children }: { children?: any } = $props();
     import { windowTitle } from "./stores/global";
 
-    console.log(typeof children);
-
     let title = $state("");
     windowTitle.subscribe((it) => {
         title = it;
     });
 </script>
 
-<div class="border95 bg95-gray m-3 max-w-7xl overflow-scroll p-1">
+<div class="border95 bg95-gray m-3 overflow-scroll p-1">
     <div class="bg-gradient95 flex">
         <div class="mr-auto flex">
             <img
@@ -25,7 +23,7 @@
             <div class="btn95-gray grid place-content-center">⨉</div>
         </div>
     </div>
-    <div class="bg-gray-ccc border95-inv mt-1">
+    <div class="bg-gray-ccc border95-inv mt-1 overflow-scroll">
         {@render children()}
     </div>
 </div>

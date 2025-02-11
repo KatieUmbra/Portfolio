@@ -9,10 +9,9 @@
 </script>
 
 <div class="bg-gray-ccc border95-inv">
-    <div class="flex">
+    <div class="minmax-w-60lvw flex">
         <h1 class="m-3 mr-auto text-5xl">Blog Posts</h1>
-        <a class="btn95 m-5 ml-auto" href="/blog/new_post"
-            ><div>New post</div></a>
+        <a class="btn95 m-5 ml-auto" href="/blog/new_post">New post</a>
     </div>
     {#if posts.length == 0}
         <p class="m-3 text-xl">There are no posts yet! :(</p>

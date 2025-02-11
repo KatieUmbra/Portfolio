@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
     import { page } from "$app/state";
     import type { BlogPost } from "$lib/backend/schema/blog";
     import type { Claims } from "$lib/backend/schema/user";
@@ -29,16 +28,6 @@
         );
         return postId;
     }
-
-    let delText = $state("Delete");
-
-    function deleteHandler() {
-        if (delText == "Delete") {
-            delText = "Are you sure?";
-        } else {
-            goto(`/blog/delete?id=${getId()}`);
-        }
-    }
 </script>
 
 <svelte:head>
@@ -51,9 +40,8 @@
         <a href="/blog/post?id={getId() - 1}" class="btn95 m-3 place-self-start"
             >&lt; Prev</a>
         {#if isCreator}
-            <button onclick={deleteHandler} class="btn95 m-3 ml-auto">
-                {delText}
-            </button>
+            <a href="/blog/delete?id={getId()}" class="btn95 m-3 ml-auto"
+                >Delete</a>
             <a href="/blog/new_post?edit={getId()}" class="btn95 m-3">Edit</a>
             <a href="/blog/post?id={getId() + 1}" class="btn95 m-3"
                 >Next &gt;</a>
@@ -77,7 +65,7 @@
             <p class="ml-3 mt-1.5 text-2xl">{data.post.likes}</p>
         </div>
     </div>
-    <div class="markdown txt95 m-3 grid place-self-center">
+    <div class="markdown txt95 grid place-self-center">
         {@html data.post.content}
     </div>
 </div>
@@ -85,14 +73,9 @@
 <style>
     :global(.markdown) {
         display: grid;
-        max-width: calc(100% - 1.5rem);
-        min-width: calc(100% - 1.5rem);
-        :global(*) {
-            overflow-wrap: break-word;
-            min-width: 100%;
-            max-width: 100%;
-            hyphens: auto;
-        }
+        min-width: calc(100% - 1rem);
+        max-width: calc(100% - 1rem);
+        overflow:scroll;
         :global(h2) {
             font-size: 24pt;
         }

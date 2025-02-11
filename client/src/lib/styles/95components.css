@@ -6,6 +6,7 @@
     border-bottom-color: black;
     background: transparent;
     border-radius: 1px;
+    padding: 0.25rem 0.5rem;
 }
 
 .btn95:hover {

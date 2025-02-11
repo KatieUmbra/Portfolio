@@ -15,6 +15,18 @@
     background: #ccc;
 }
 
+.minmax-w-80lvw {
+    width: 80lvw;
+    min-width: 80lvw;
+    max-width: 80lvw;
+}
+
+.minmax-w-60lvw {
+    width: 60lvw;
+    min-width: 60lvw;
+    max-width: 60lvw;
+}
+
 textarea:focus, 
 textarea.form-control:focus, 
 input.form-control:focus, 

@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ url, cookies }) => {
     await preemptiveAuthCheck({ url, cookies });
 
     if (id != null && id != undefined) {
-        const request = await backendRequest<BlogPost>(`blog/get_md?id=${id}`);
+        const request = await backendRequest<BlogPost>(`blog/get_md?id=${id}`, { method: "GET" });
 
         if (request.isOk) {
             editPost.id = parseInt(id as string);

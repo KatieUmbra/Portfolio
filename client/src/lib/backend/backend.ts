@@ -31,12 +31,15 @@ export async function preemptiveAuthCheck({ url, cookies }: any) {
     }
 }
 
-export async function backendRequest<T>(route: string, details?: RequestInit, auth?: { token: string, currentPage: string }): Promise<Result<T, ApiError>> {
+export async function backendRequest<T>(route: string, details: RequestInit, auth?: { token: string, currentPage: string }): Promise<Result<T, ApiError>> {
     if (auth != null) {
-        if (details?.headers == null) {
+        if (details.headers == null) {
             (details as any).headers = {}
         }
-        (details?.headers as any).Authorization = "Bearer " + auth?.token;
+        (details.headers as any).Authorization = "Bearer " + auth?.token;
+    }
+    if (details.mode == null) {
+        details.mode = "cors";
     }
     const request = await fetch("http://localhost:8081/" + route, details);
     let json;
