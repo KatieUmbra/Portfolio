@@ -27,7 +27,7 @@
     <div class="ml-4 mr-4"></div>
 </div>
 <div
-    class="max-h-95 bg-95 min-h-95 grid w-full items-center justify-center overflow-scroll">
+    class="max-h-95 bg-95 min-h-95 flex w-full items-center justify-center overflow-scroll">
     <WindowWrapper>
         <slot />
     </WindowWrapper>

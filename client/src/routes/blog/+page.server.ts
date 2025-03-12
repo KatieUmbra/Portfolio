@@ -5,7 +5,7 @@ import type { BlogPost } from "$lib/backend/schema/blog";
 
 
 export const load: PageServerLoad = async (_) => {
-    const request = await backendRequest<{ vec: BlogPost[] }>("blog/get_latest?amount=10", {
+    const request = await backendRequest<{ vec: BlogPost[] }>("blog/get_latest?page=1&amount=10", {
         method: "GET",
         mode: "cors",
         headers: {

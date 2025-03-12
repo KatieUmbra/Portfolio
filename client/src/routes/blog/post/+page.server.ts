@@ -1,10 +1,23 @@
-import { backendRequest } from "$lib/backend/backend";
-import type { BlogPost } from "$lib/backend/schema/blog";
 import { Claims } from "$lib/backend/schema/user";
-import type { PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
+import { fail } from "@sveltejs/kit";
+import { backendRequest } from "$lib/backend/backend";
+import { BlogComment, BlogCommentData, type BlogPost } from "$lib/backend/schema/blog";
 
 export const load: PageServerLoad = async ({ url, cookies }: any) => {
     const id = url.searchParams.get("id");
+
+    const commentsRequest = await backendRequest<BlogComment[]>("blog/comment/get_latest?page=1&amount=10", {
+        method: "GET",
+        mode: "cors"
+    });
+
+    let comments: BlogComment[] | null = null;
+    if (commentsRequest.isOk) {
+        comments = commentsRequest.value;
+    } else {
+        console.log(commentsRequest.error);
+    }
 
     const request = await backendRequest<BlogPost>(`blog/get?id=${id}`, {
         method: "GET",
@@ -30,6 +43,7 @@ export const load: PageServerLoad = async ({ url, cookies }: any) => {
         }
         return {
             post,
+            comments,
             currentUser,
             localTime
         }
@@ -46,3 +60,32 @@ export const load: PageServerLoad = async ({ url, cookies }: any) => {
             }
     }
 }
+
+export const actions = {
+    default: async({ request, cookies, url }: any) => {
+        const data = await request.formData();
+        const token = cookies.get("token");
+
+        const formData = new BlogCommentData(
+            data.get("comment") as string,
+            url.searchParams.get("id") as number,
+            undefined
+        );
+
+        let method = "POST";
+        let requestStr = "blog/comment/post";
+
+        const req = await backendRequest(requestStr, {
+            method: method,
+            mode: "cors", headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData)
+        }, { token, currentPage: url.pathname });
+
+        if (!req.isOk) {
+            return fail(req.error.status_code, { ...req.error, failure: true });
+        }
+
+    }
+} satisfies Actions;

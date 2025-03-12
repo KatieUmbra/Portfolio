@@ -2,14 +2,28 @@
     import { goto } from "$app/navigation";
     import { page } from "$app/state";
     import type { BlogPost } from "$lib/backend/schema/blog";
+    import type { BlogComment } from "$lib/backend/schema/blog";
     import type { Claims } from "$lib/backend/schema/user";
     import { windowTitle } from "$lib/stores/global";
 
+    let comment: string = $state("");
+
     let {
+        form,
         data,
     }: {
-        data: { post: BlogPost; currentUser: Claims | null; localTime: Date };
+        form: any;
+        data: {
+            post: BlogPost;
+            currentUser: Claims;
+            comments: BlogComment[] | null;
+            localTime: Date;
+        };
     } = $props();
+
+    let comments: BlogComment[] = data.comments as BlogComment[];
+
+    console.log(data.post.id);
 
     windowTitle.set(`Post - ${data.post.title}`);
 
@@ -80,6 +94,38 @@
     <div class="markdown txt95 m-3 grid place-self-center">
         {@html data.post.content}
     </div>
+    <hr />
+    {#if data.post.id != -1}
+        <div class="grid">
+            <form class="grid" method="POST">
+                <p class="m-3 text-xl font-bold">
+                    Comment something about this article!
+                </p>
+                <textarea
+                    name="comment"
+                    class="txt-in95 comment-box m-3 h-48 w-96 resize-none place-self-center"
+                    bind:value={comment}
+                    placeholder="comment"></textarea>
+
+                <button type="submit" class="btn95 m-3 max-w-min">
+                    Submit
+                </button>
+                {#if form?.failure}
+                    <p class="m-3">{form?.message}</p>
+                {/if}
+            </form>
+            <h2 class="m-3 place-self-start text-xl font-bold">Comments</h2>
+            <div>
+                {#if data.comments?.length == 0}
+                    {#each comments as comment}
+                        <p>{comment.content}</p>
+                    {/each}
+                {:else}
+                    <p class="m-3">There are no comments! :(</p>
+                {/if}
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -121,5 +167,9 @@
             margin-bottom: 0.75rem;
             margin: auto;
         }
+    }
+    .comment-box {
+        max-width: calc(100% - 10rem);
+        min-width: calc(100% - 1.5rem);
     }
 </style>

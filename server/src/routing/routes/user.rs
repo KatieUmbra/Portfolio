@@ -106,7 +106,14 @@ pub async fn req_email_verify(claims: Claims, State(state): State<AppState>) -> 
         .body(format!(
             "Verify your email address with the following link: http://localhost:45886/verify?token={}", &secret
         ))
-        .unwrap();
+        .map_err(|e| {
+            tracing::debug!("{:?}", e);
+            ApiError {
+                message: "Internal server error (email)".into(),
+                status_code: StatusCode::INTERNAL_SERVER_ERROR,
+                error_code: ApiErrorCode::InternalUnspecifiedError
+            }
+        })?;
 
     let request = EmailRequest {
         username: claims.username.clone(),

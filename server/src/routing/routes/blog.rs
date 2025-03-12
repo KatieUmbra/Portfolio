@@ -5,7 +5,7 @@ use axum::{
 };
 
 use crate::{
-    database::schema::blog_data::{I32Wrapper, IdWrapper, Post, PostData, VecWrapper},
+    database::schema::blog_data::{IdWrapper, Post, PostData, RangeParams, VecWrapper},
     util::{
         error::{generic_error, ApiError, ApiErrorCode},
         jwt::Claims,
@@ -72,19 +72,13 @@ pub async fn edit(
 
 pub async fn get_latest(
     State(state): State<AppState>,
-    it: Query<I32Wrapper>,
+    params: Query<RangeParams>,
 ) -> Result<Json<VecWrapper<Post>>, ApiError> {
-    tracing::info!("GET /blog/get_latest {}", it.amount);
-    let latest = Post::get_latest(it.amount, &state.pool).await?;
+    let page = params.page;
+    let amount = params.amount;
+    tracing::info!("GET /blog/get_latest page: {} amount: {}", page, amount);
+    let latest = Post::get_latest(((page - 1) * amount, amount), &state.pool).await?;
     Ok(Json(VecWrapper { vec: latest }))
-}
-
-pub async fn comment(claims: Claims) -> ApiResult {
-    if claims.rank > 2 {
-        return Err(generic_error(ApiErrorCode::AccountUnverified));
-    }
-    tracing::info!("POST /blog/comment user: {}, post:", claims.username);
-    Ok(())
 }
 
 pub async fn like(claims: Claims) -> ApiResult {

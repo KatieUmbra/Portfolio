@@ -47,7 +47,11 @@ impl AppState {
             settings.smtp_password.clone(),
         );
 
-        let email_sender = SmtpTransport::relay("mail.smtp2go.com")?
+        let email_sender = SmtpTransport::relay("mail.smtp2go.com")
+            .map_err(|e| {
+                tracing::debug!("{:?}", e);
+                e
+            })?
             .credentials(creds)
             .build();
         Ok(AppState {

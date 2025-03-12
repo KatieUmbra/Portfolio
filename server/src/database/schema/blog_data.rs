@@ -36,12 +36,20 @@ pub struct PostData {
 
 #[derive(Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct Comment {
-    creator: String,
-    post: u32,
-    parent: Option<u32>,
-    date: DateTime<Utc>,
-    content: String,
-    likes: u32,
+    pub id: i32,
+    pub creator: String,
+    pub post: i32,
+    pub parent: Option<i32>,
+    pub creation: DateTime<Utc>,
+    pub content: String,
+    pub likes: i32,
+}
+
+#[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
+pub struct CommentData {
+    pub content: String,
+    pub post: i32,
+    pub parent: Option<i32>,
 }
 
 #[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
@@ -49,6 +57,10 @@ pub struct VecWrapper<T> {
     pub vec: Vec<T>,
 }
 
+/*
+ * I am well aware these two structs are the same thing but I just can't be bothered to do anything
+ * about it right now
+ * */
 #[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct IdWrapper {
     pub id: i32,
@@ -56,6 +68,12 @@ pub struct IdWrapper {
 
 #[derive(Debug, Serialize, sqlx::FromRow, Deserialize, Clone, Default)]
 pub struct I32Wrapper {
+    pub amount: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct RangeParams {
+    pub page: i32,
     pub amount: i32,
 }
 
@@ -198,10 +216,12 @@ impl Post {
         Ok(result)
     }
 
-    pub async fn get_latest(amount: i32, pool: &PgPool) -> Result<Vec<Post>, ApiError> {
-        let query = "SELECT * FROM posts ORDER BY creation DESC FETCH FIRST $1 ROWS ONLY";
+    pub async fn get_latest(range: (i32, i32), pool: &PgPool) -> Result<Vec<Post>, ApiError> {
+        let query =
+            "SELECT * FROM posts ORDER BY creation DESC OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY";
         let data = sqlx::query_as::<_, Post>(query)
-            .bind(amount)
+            .bind(range.0)
+            .bind(range.1)
             .fetch_all(pool)
             .await
             .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
@@ -262,6 +282,107 @@ impl From<PostData> for Post {
             description: it.description,
             content: it.content,
             creator: "".into(),
+            likes: 0,
+            creation: Utc::now(),
+        }
+    }
+}
+
+impl Comment {
+    pub async fn create(self, pool: &PgPool) -> ApiResult {
+        let query = "INSERT INTO comments (creator, post, parent_id, content, creation, likes) VALUES ($1, $2, $3, $4, $5, 0)";
+        let _ = sqlx::query(query)
+            .bind(&self.creator)
+            .bind(&self.post)
+            .bind(&self.parent)
+            .bind(&self.content)
+            .bind(Utc::now())
+            .execute(pool)
+            .await
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+        Ok(())
+    }
+    pub async fn update(self, pool: &PgPool) -> ApiResult {
+        let query_username = "SELECT * FROM comments WHERE id=$1";
+        let creator = sqlx::query_as::<_, Self>(query_username)
+            .bind(&self.id)
+            .fetch_one(pool)
+            .await
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+
+        if self.creator != creator.creator {
+            return Err(generic_error(ApiErrorCode::BlogUnauthorized));
+        }
+
+        let query = "UPDATE comments SET content=$1 WHERE id=$2";
+        let _ = sqlx::query(query)
+            .bind(&self.content)
+            .bind(&self.id)
+            .execute(pool)
+            .await
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+        Ok(())
+    }
+    pub async fn get(id: i32, pool: &PgPool) -> Result<Comment, ApiError> {
+        let query = "SELECT * FROM comments WHERE id = $1";
+        let result = sqlx::query_as::<_, Comment>(query)
+            .bind(id)
+            .fetch_one(pool)
+            .await
+            .map_err(|_| ApiError {
+                message: "The requested comment couldn't be found.".into(),
+                status_code: StatusCode::NOT_FOUND,
+                error_code: ApiErrorCode::BlogNotFound,
+            })?;
+        Ok(result)
+    }
+    pub async fn get_latest(range: (i32, i32), pool: &PgPool) -> Result<Vec<Comment>, ApiError> {
+        let query =
+            "SELECT * FROM comments ORDER BY creation DESC OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY";
+        let data = sqlx::query_as::<_, Comment>(query)
+            .bind(range.0)
+            .bind(range.1)
+            .fetch_all(pool)
+            .await
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+        Ok(data)
+    }
+    pub async fn delete(id: i32, pool: &PgPool, constraint: Option<String>) -> ApiResult {
+        match constraint {
+            Some(usr) => {
+                let query = "DELETE FROM comments WHERE id = $1 AND creator = $2;";
+                let _ = sqlx::query(query)
+                    .bind(id)
+                    .bind(usr)
+                    .execute(pool)
+                    .await
+                    .map_err(|_| ApiError {
+                        message: "You are not the creator of this comment!".into(),
+                        status_code: StatusCode::UNAUTHORIZED,
+                        error_code: ApiErrorCode::BlogUnauthorized,
+                    })?;
+            }
+            None => {
+                let query = "DELETE FROM comments WHERE id = $1;";
+                let _ = sqlx::query(query)
+                    .bind(id)
+                    .execute(pool)
+                    .await
+                    .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl From<CommentData> for Comment {
+    fn from(it: CommentData) -> Comment {
+        Comment {
+            id: 0,
+            content: it.content,
+            creator: "".into(),
+            parent: it.parent,
+            post: it.post,
             likes: 0,
             creation: Utc::now(),
         }
