@@ -43,4 +43,8 @@
         font-family: "W95FA", serif !important;
         font-family: "W95FA", sans-serif !important;
     }
+
+    :global(hr) {
+        color: black;
+    }
 </style>

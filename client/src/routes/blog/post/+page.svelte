@@ -80,19 +80,25 @@
                 >Next &gt;</a>
         {/if}
     </div>
-    <h1 class="txt95 m-3 text-6xl font-bold">{data.post.title}</h1>
-    <p class="txt95 m-3 text-2xl">{data.post.description}</p>
-    <div class="flex">
-        <p class="txt95 m-3 text-2xl">by: <b>{data.post.creator}</b></p>
-        <p class="txt95 m-3 text-2xl">
-            {data.localTime.toLocaleDateString()}
+    <div class="txt95 m-3">
+        <h1 class="m-3 text-6xl font-bold">{data.post.title}</h1>
+        <hr />
+        <p class="m-3 text-2xl">
+            {data.post.description}
         </p>
-        <p class="txt95 m-3 text-2xl">
-            {data.localTime.toLocaleTimeString()}
-        </p>
-        <div class="m-3 flex">
-            <button class="btn95 text-2xl"><div>Like</div></button>
-            <p class="ml-3 mt-1.5 text-2xl">{data.post.likes}</p>
+        <div class="m-3 flex text-gray-400">
+            <p class="mr-1">by: <b>{data.post.creator}</b></p>
+            <p class="mr-1">
+                at:
+                {data.localTime.toLocaleTimeString()}
+            </p>
+            <p class="mr-1">
+                {data.localTime.toLocaleDateString()}
+            </p>
+            <div class="mr-1 flex">
+                <button class="mr-1"><u>Like</u></button>
+                <p class="">{data.post.likes}</p>
+            </div>
         </div>
     </div>
     <div class="markdown txt95 m-3 grid place-self-center">

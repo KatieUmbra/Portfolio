@@ -31,6 +31,7 @@
     max-width: 60lvw;
 }
 
+/*
 textarea:focus, 
 textarea.form-control:focus, 
 input.form-control:focus, 
@@ -45,3 +46,4 @@ input[type=number]:focus,
 [contenteditable].form-control:focus {
     outline: 0 !important;
 }
+*/
