@@ -21,10 +21,6 @@
         };
     } = $props();
 
-    let comments: BlogComment[] = data.comments as BlogComment[];
-
-    console.log(data.post.id);
-
     windowTitle.set(`Post - ${data.post.title}`);
 
     let isCreator: boolean = $derived.by(() => {
@@ -37,14 +33,14 @@
         return false;
     });
 
+    let delText = $state("Delete");
+
     function getId(): number {
         const postId: number = parseInt(
             page.url.searchParams.get("id") as string,
         );
         return postId;
     }
-
-    let delText = $state("Delete");
 
     function deleteHandler() {
         if (delText == "Delete") {
@@ -53,13 +49,21 @@
             goto(`/blog/delete?id=${getId()}`);
         }
     }
+
+    function parseDatetime(dt: string): string {
+        const parsedDate = new Date(dt);
+        const localTime = new Date(
+            parsedDate.getTime() - parsedDate.getTimezoneOffset() * 60 * 1000,
+        );
+        return localTime.toLocaleString();
+    }
 </script>
 
 <svelte:head>
     <title>{data.post.title}</title>
 </svelte:head>
 
-<div class="minmax-w-80lvw grid">
+<div class="minmax-w-80lvw max-h-80lvh grid">
     <div class="flex">
         <a href="/blog" class="btn95 m-3"><div>Go Back</div></a>
         <a href="/blog/post?id={getId() - 1}" class="btn95 m-3 place-self-start"
@@ -97,31 +101,43 @@
     <hr />
     {#if data.post.id != -1}
         <div class="grid">
-            <form class="grid" method="POST">
-                <p class="m-3 text-xl font-bold">
-                    Comment something about this article!
-                </p>
-                <textarea
-                    name="comment"
-                    class="txt-in95 comment-box m-3 h-48 w-96 resize-none place-self-center"
-                    bind:value={comment}
-                    placeholder="comment"></textarea>
+            {#if data.currentUser != null}
+                <form class="grid" method="POST">
+                    <p class="m-3 text-xl font-bold">
+                        Comment something about this article!
+                    </p>
+                    <textarea
+                        name="comment"
+                        class="txt-in95 comment-box m-3 h-20 w-96 resize-none place-self-center"
+                        bind:value={comment}
+                        placeholder="comment"></textarea>
 
-                <button type="submit" class="btn95 m-3 max-w-min">
-                    Submit
-                </button>
-                {#if form?.failure}
-                    <p class="m-3">{form?.message}</p>
-                {/if}
-            </form>
+                    <button type="submit" class="btn95 m-3 max-w-min">
+                        Submit
+                    </button>
+                    {#if form?.failure}
+                        <p class="m-3">{form?.message}</p>
+                    {/if}
+                </form>
+            {/if}
             <h2 class="m-3 place-self-start text-xl font-bold">Comments</h2>
             <div>
                 {#if data.comments?.length == 0}
-                    {#each comments as comment}
-                        <p>{comment.content}</p>
-                    {/each}
-                {:else}
                     <p class="m-3">There are no comments! :(</p>
+                {:else}
+                    {#each data.comments!! as comment}
+                        <div class="txt95 m-3 p-3">
+                            <div class="flex">
+                                <p class="mr-2">by: <b>{comment.creator}</b></p>
+                                <p>
+                                    at:
+                                    {parseDatetime(comment.creation as string)}
+                                </p>
+                            </div>
+                            <hr />
+                            <p class="p-3">{comment.content}</p>
+                        </div>
+                    {/each}
                 {/if}
             </div>
         </div>

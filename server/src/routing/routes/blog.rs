@@ -19,7 +19,7 @@ pub async fn post_to_blog(
     State(state): State<AppState>,
     claims: Claims,
     Json(post_data): Json<PostData>,
-) -> Result<(), ApiError> {
+) -> ApiResult {
     if claims.rank > 1 {
         return Err(ApiError {
             message: "You're not allowed to post to this site.".into(),

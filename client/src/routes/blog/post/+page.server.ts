@@ -7,16 +7,14 @@ import { BlogComment, BlogCommentData, type BlogPost } from "$lib/backend/schema
 export const load: PageServerLoad = async ({ url, cookies }: any) => {
     const id = url.searchParams.get("id");
 
-    const commentsRequest = await backendRequest<BlogComment[]>("blog/comment/get_latest?page=1&amount=10", {
+    const commentsRequest = await backendRequest<{ vec: BlogComment[] }>(`blog/comment/get_latest?post_id=${id}&page=1&amount=10`, {
         method: "GET",
         mode: "cors"
     });
 
     let comments: BlogComment[] | null = null;
     if (commentsRequest.isOk) {
-        comments = commentsRequest.value;
-    } else {
-        console.log(commentsRequest.error);
+        comments = commentsRequest.value.vec;
     }
 
     const request = await backendRequest<BlogPost>(`blog/get?id=${id}`, {
@@ -68,16 +66,12 @@ export const actions = {
 
         const formData = new BlogCommentData(
             data.get("comment") as string,
-            url.searchParams.get("id") as number,
-            undefined
+            parseInt(url.searchParams.get("id")),
+            null
         );
-
-        let method = "POST";
-        let requestStr = "blog/comment/post";
-
-        const req = await backendRequest(requestStr, {
-            method: method,
-            mode: "cors", headers: {
+        const req = await backendRequest("blog/comment/post", {
+            method: "POST",
+            headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(formData)

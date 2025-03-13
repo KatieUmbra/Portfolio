@@ -21,6 +21,10 @@
     max-width: 80lvw;
 }
 
+.max-h-80lvh {
+    max-height: 80lvh;
+}
+
 .minmax-w-60lvw {
     width: 60lvw;
     min-width: 60lvw;

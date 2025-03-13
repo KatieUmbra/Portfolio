@@ -77,6 +77,13 @@ pub struct RangeParams {
     pub amount: i32,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
+pub struct PostCommentFilter {
+    pub post_id: i32,
+    pub page: i32,
+    pub amount: i32,
+}
+
 impl Post {
     pub async fn create(self, pool: &PgPool) -> ApiResult {
         let query = "INSERT INTO posts (creator, description, title, creation, likes) VALUES ($1, $2, $3, $4, 0) RETURNING id";
@@ -231,19 +238,31 @@ impl Post {
     pub async fn delete(id: i32, pool: &PgPool, constraint: Option<String>) -> ApiResult {
         match constraint {
             Some(usr) => {
+                let query = "SELECT * FROM posts WHERE id = $1;";
+                let creator = sqlx::query_as::<_, Self>(query)
+                    .bind(id)
+                    .fetch_one(pool)
+                    .await
+                    .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?
+                    .creator;
+                if usr != creator {
+                    return Err(ApiError {
+                        message: "You are not the creator of this post!".into(),
+                        status_code: StatusCode::UNAUTHORIZED,
+                        error_code: ApiErrorCode::BlogUnauthorized,
+                    });
+                }
+                Self::delete_comments(id, &pool).await?;
                 let query = "DELETE FROM posts WHERE id = $1 AND creator = $2;";
                 let _ = sqlx::query(query)
                     .bind(id)
                     .bind(usr)
                     .execute(pool)
                     .await
-                    .map_err(|_| ApiError {
-                        message: "You are not the creator of this post!".into(),
-                        status_code: StatusCode::UNAUTHORIZED,
-                        error_code: ApiErrorCode::BlogUnauthorized,
-                    })?;
+                    .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
             }
             None => {
+                Self::delete_comments(id, &pool).await?;
                 let query = "DELETE FROM posts WHERE id = $1;";
                 let _ = sqlx::query(query)
                     .bind(id)
@@ -272,6 +291,16 @@ impl Post {
         }
         Ok(())
     }
+
+    async fn delete_comments(id: i32, pool: &PgPool) -> ApiResult {
+        let query = "DELETE FROM comments WHERE post = $1;";
+        let _ = sqlx::query(query)
+            .bind(id)
+            .execute(pool)
+            .await
+            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+        Ok(())
+    }
 }
 
 impl From<PostData> for Post {
@@ -290,7 +319,7 @@ impl From<PostData> for Post {
 
 impl Comment {
     pub async fn create(self, pool: &PgPool) -> ApiResult {
-        let query = "INSERT INTO comments (creator, post, parent_id, content, creation, likes) VALUES ($1, $2, $3, $4, $5, 0)";
+        let query = "INSERT INTO comments (creator, post, parent, content, creation, likes) VALUES ($1, $2, $3, $4, $5, 0)";
         let _ = sqlx::query(query)
             .bind(&self.creator)
             .bind(&self.post)
@@ -299,7 +328,10 @@ impl Comment {
             .bind(Utc::now())
             .execute(pool)
             .await
-            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+            .map_err(|e| {
+                tracing::error!("{:?}", e);
+                generic_error(ApiErrorCode::InternalSqlxError)
+            })?;
         Ok(())
     }
     pub async fn update(self, pool: &PgPool) -> ApiResult {
@@ -336,15 +368,23 @@ impl Comment {
             })?;
         Ok(result)
     }
-    pub async fn get_latest(range: (i32, i32), pool: &PgPool) -> Result<Vec<Comment>, ApiError> {
+    pub async fn get_latest(
+        post: i32,
+        range: (i32, i32),
+        pool: &PgPool,
+    ) -> Result<Vec<Comment>, ApiError> {
         let query =
-            "SELECT * FROM comments ORDER BY creation DESC OFFSET $1 ROWS FETCH NEXT $2 ROWS ONLY";
+            "SELECT * FROM comments WHERE post = $1 ORDER BY creation DESC OFFSET $2 ROWS FETCH NEXT $3 ROWS ONLY";
         let data = sqlx::query_as::<_, Comment>(query)
+            .bind(post)
             .bind(range.0)
             .bind(range.1)
             .fetch_all(pool)
             .await
-            .map_err(|_| generic_error(ApiErrorCode::InternalSqlxError))?;
+            .map_err(|e| {
+                tracing::error!("{:?}", e);
+                generic_error(ApiErrorCode::InternalSqlxError)
+            })?;
         Ok(data)
     }
     pub async fn delete(id: i32, pool: &PgPool, constraint: Option<String>) -> ApiResult {

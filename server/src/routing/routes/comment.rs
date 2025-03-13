@@ -4,7 +4,7 @@ use axum::{
 };
 
 use crate::{
-    database::schema::blog_data::{Comment, CommentData, IdWrapper, RangeParams, VecWrapper},
+    database::schema::blog_data::{Comment, CommentData, IdWrapper, PostCommentFilter, VecWrapper},
     util::{
         error::{generic_error, ApiError, ApiErrorCode},
         jwt::Claims,
@@ -19,6 +19,7 @@ pub async fn post_comment(
     claims: Claims,
     Json(comment_data): Json<CommentData>,
 ) -> ApiResult {
+    tracing::info!("TEST");
     tracing::info!("POST /blog/comment/post data: {:#?}", comment_data);
     if claims.rank > 2 {
         return Err(generic_error(ApiErrorCode::AccountUnverified));
@@ -40,8 +41,9 @@ pub async fn get_comment(
 }
 pub async fn get_latest_comments(
     State(state): State<AppState>,
-    params: Query<RangeParams>,
+    params: Query<PostCommentFilter>,
 ) -> Result<Json<VecWrapper<Comment>>, ApiError> {
+    let post = params.post_id;
     let page = params.page;
     let amount = params.amount;
     tracing::info!(
@@ -49,7 +51,7 @@ pub async fn get_latest_comments(
         page,
         amount
     );
-    let latest = Comment::get_latest(((page - 1) * amount, amount), &state.pool).await?;
+    let latest = Comment::get_latest(post, ((page - 1) * amount, amount), &state.pool).await?;
     Ok(Json(VecWrapper { vec: latest }))
 }
 pub async fn edit_comment(

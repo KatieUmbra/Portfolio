@@ -23,8 +23,8 @@ export class BlogComment {
         public id: number,
         public creator: string,
         public post: number,
-        public parent: number | undefined,
-        public creation: Date | string,
+        public parent_id: number | undefined,
+        public creation: string,
         public content: string,
         public likes: number
     ) {
@@ -35,6 +35,6 @@ export class BlogCommentData {
     constructor (
         public content: string,
         public post: number,
-        public parent: number | undefined
+        public parent: number | null
     ) {}
 }
